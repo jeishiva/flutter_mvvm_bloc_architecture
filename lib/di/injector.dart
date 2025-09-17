@@ -6,7 +6,7 @@ import 'package:get_it/get_it.dart';
 
 final GetIt getIt = GetIt.instance;
 
-void setup() {
+void initInjector() {
   getIt.registerLazySingleton<ProductLocalDataSource>(() => ProductLocalDataSourceImpl());
   getIt.registerLazySingleton<ProductRepository>(
           () => ProductRepositoryImpl(localDataSource: getIt<ProductLocalDataSource>())
