@@ -45,6 +45,8 @@ dependencies:
   # Equatable for cleaner state comparisons
   equatable: ^2.0.5
 
+  # UUID for generating unique IDs
+  uuid: ^4.4.0 # Use the latest stable version here
 
 dev_dependencies:
   flutter_test:

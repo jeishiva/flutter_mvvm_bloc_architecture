@@ -4,10 +4,10 @@ import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
 
 import '../../domain/repositories/product_repo.dart';
 
-class ProductRepoImpl implements ProductRepository {
+class ProductRepositoryImpl implements ProductRepository {
   final ProductLocalDataSource localDataSource;
 
-  const ProductRepoImpl({required this.localDataSource});
+  const ProductRepositoryImpl({required this.localDataSource});
 
   @override
   Future<void> addProduct(Product product) async {
@@ -19,4 +19,5 @@ class ProductRepoImpl implements ProductRepository {
     final models = await localDataSource.getAllProducts();
     return models.map((model) => model.toEntity()).toList();
   }
+
 }
