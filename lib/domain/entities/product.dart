@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 class Product extends Equatable {
   final String id;
   final String name;
-  final double price;
+  final int price;
   final DateTime createdAt;
   final String? description;
 
@@ -18,7 +18,7 @@ class Product extends Equatable {
   Product copyWith({
     String? id,
     String? name,
-    double? price,
+    int? price,
     DateTime? createdAt,
     String? description,
   }) {

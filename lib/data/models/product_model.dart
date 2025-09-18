@@ -5,7 +5,7 @@ class ProductModel extends Equatable {
   final String id;
   final String name;
   final DateTime createdAt;
-  final double price;
+  final int price;
   final String? description;
 
   const ProductModel({
@@ -21,7 +21,7 @@ class ProductModel extends Equatable {
       id: json['id'] as String,
       name: json['name'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
-      price: json['price'] as double,
+      price: json['price'] as int,
       description: json['description'] as String?,
     );
   }
@@ -60,7 +60,7 @@ class ProductModel extends Equatable {
     String? id,
     String? name,
     DateTime? createdAt,
-    double? price,
+    int? price,
     String? description,
   }) {
     return ProductModel(

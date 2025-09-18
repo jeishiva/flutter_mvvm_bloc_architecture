@@ -17,17 +17,26 @@ class ProductInitial extends ProductState {
 
 class ProductLoaded extends ProductState {
   final List<Product> products;
-  const ProductLoaded(this.products);
+  final bool hasMore;
+  final int pageNumber;
+  final bool isLoadingMore;
+
+  const ProductLoaded({
+    required this.products,
+    required this.hasMore,
+    required this.pageNumber,
+    this.isLoadingMore = false,
+  });
 
   @override
-  List<Object?> get props => [products];
+  List<Object?> get props => [products, hasMore, pageNumber, isLoadingMore];
 }
 
 class ProductError extends ProductState {
   final String message;
-
-  const ProductError(this.message);
+  final List<Product> products;
+  const ProductError({required this.message, this.products = const []});
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, products];
 }

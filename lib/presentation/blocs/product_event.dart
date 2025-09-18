@@ -8,11 +8,8 @@ abstract class ProductEvent extends Equatable {
 }
 
 class LoadProducts extends ProductEvent {
-  const LoadProducts();
-}
-
-class AddProduct extends ProductEvent {
-  final String name;
-
-  const AddProduct(this.name);
+  final int pageNumber;
+  final int offset;
+  final int limit;
+  const LoadProducts({required this.pageNumber, required this.offset, required this.limit});
 }
