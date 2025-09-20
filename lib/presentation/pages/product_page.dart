@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/di/injector.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc.dart';
+import 'package:rxdart/rxdart.dart';
 
 class ProductPage extends StatefulWidget {
   const ProductPage({super.key});
@@ -12,42 +13,42 @@ class ProductPage extends StatefulWidget {
 }
 
 class _ProductsPageState extends State<ProductPage> {
-  static const int _pageSize = 20;
   late final ProductBloc _bloc;
   final ScrollController _scrollController = ScrollController();
-  int _currentPage = 1;
   bool _isLoadingMore = false;
   bool _hasMore = true;
+  final _scrollSubject = PublishSubject<void>();
 
   @override
   void initState() {
     super.initState();
     _bloc = getIt<ProductBloc>();
+    _bloc.add(LoadProducts());
     _scrollController.addListener(_onScroll);
-    _bloc.add(
-      LoadProducts(pageNumber: _currentPage, offset: 0, limit: _pageSize),
-    );
+    _scrollSubject
+        .throttleTime(const Duration(milliseconds: 100)) // or debounceTime
+        .listen((_) {
+          const double threshold = 400.0;
+          final remaining = _scrollController.position.extentAfter;
+          if (remaining <= threshold) {
+            _loadNextPage();
+          }
+        });
   }
 
   void _onScroll() {
-    if (!_scrollController.hasClients || _isLoadingMore || !_hasMore) {
+    if (!_scrollController.hasClients) {
       return;
     }
-    final threshold = 200.0;
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.position.pixels;
-    if (maxScroll - currentScroll <= threshold) {
-      _loadNextPage();
-    }
+    _scrollSubject.add(null);
   }
 
   void _loadNextPage() {
+    if (_isLoadingMore || !_hasMore) {
+      return;
+    }
     _isLoadingMore = true;
-    _currentPage += 1;
-    final offset = (_currentPage - 1) * _pageSize;
-    _bloc.add(
-      LoadProducts(pageNumber: _currentPage, offset: offset, limit: _pageSize),
-    );
+    _bloc.add(LoadProducts());
   }
 
   @override
@@ -72,15 +73,21 @@ class _ProductsPageState extends State<ProductPage> {
       ),
     );
   }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _scrollSubject.close();
+    _bloc.close();
+    super.dispose();
+  }
 }
 
 class ProductBody extends StatelessWidget {
   final ScrollController? controller;
 
-  const ProductBody({
-    super.key,
-    this.controller,
-  });
+  const ProductBody({super.key, this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -89,16 +96,19 @@ class ProductBody extends StatelessWidget {
         return switch (state) {
           ProductLoading() => const ProductLoadingWidget(),
 
-          ProductLoaded(:final products, :final hasMore, :final isLoadingMore) => ProductListWidget(
-            products: products,
-            hasMore: hasMore,
-            isLoadingMore: isLoadingMore,
-            controller: controller,
-          ),
+          ProductLoaded(
+            :final products,
+            :final hasMore,
+            :final isLoadingMore,
+          ) =>
+            ProductListWidget(
+              products: products,
+              hasMore: hasMore,
+              isLoadingMore: isLoadingMore,
+              controller: controller,
+            ),
 
-          ProductError(:final message) => ProductErrorWidget(
-            message: message,
-          ),
+          ProductError(:final message) => ProductErrorWidget(message: message),
 
           _ => const SizedBox.shrink(),
         };

@@ -12,7 +12,7 @@ class ProductLoading extends ProductState {
 }
 
 class ProductInitial extends ProductState {
-   const ProductInitial();
+  const ProductInitial();
 }
 
 class ProductLoaded extends ProductState {
@@ -35,7 +35,13 @@ class ProductLoaded extends ProductState {
 class ProductError extends ProductState {
   final String message;
   final List<Product> products;
-  const ProductError({required this.message, this.products = const []});
+  final int pageNumber;
+
+  const ProductError({
+    required this.message,
+    this.products = const [],
+    this.pageNumber = 1,
+  });
 
   @override
   List<Object?> get props => [message, products];
