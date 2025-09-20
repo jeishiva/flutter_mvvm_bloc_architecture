@@ -7,12 +7,14 @@ class ProductModel extends Equatable {
   final DateTime createdAt;
   final int price;
   final String? description;
+  final bool isFavourite;
 
   const ProductModel({
     required this.id,
     required this.name,
     required this.createdAt,
     required this.price,
+    required this.isFavourite,
     this.description,
   });
 
@@ -23,6 +25,7 @@ class ProductModel extends Equatable {
       createdAt: DateTime.parse(json['createdAt'] as String),
       price: json['price'] as int,
       description: json['description'] as String?,
+      isFavourite: json['isFavourite'] as bool? ?? false,
     );
   }
 
@@ -43,6 +46,7 @@ class ProductModel extends Equatable {
       createdAt: product.createdAt,
       price: product.price,
       description: product.description,
+      isFavourite: product.isFavourite,
     );
   }
 
@@ -53,6 +57,7 @@ class ProductModel extends Equatable {
       createdAt: createdAt,
       price: price,
       description: description,
+      isFavourite: isFavourite,
     );
   }
 
@@ -62,6 +67,7 @@ class ProductModel extends Equatable {
     DateTime? createdAt,
     int? price,
     String? description,
+    bool? isFavourite,
   }) {
     return ProductModel(
       id: id ?? this.id,
@@ -69,6 +75,7 @@ class ProductModel extends Equatable {
       createdAt: createdAt ?? this.createdAt,
       price: price ?? this.price,
       description: description ?? this.description,
+      isFavourite: isFavourite ?? this.isFavourite
     );
   }
 

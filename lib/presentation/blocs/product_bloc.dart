@@ -15,6 +15,33 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
 
   ProductBloc(this.productRepo) : super(ProductInitial()) {
     on<LoadProducts>(_onLoadProducts);
+    on<ToggleFavourite>(_onToggleFavourite);
+  }
+
+  Future<void> _onToggleFavourite(
+    ToggleFavourite event,
+    Emitter<ProductState> emit,
+  ) async {
+    LogManager.debug("favourite clicked for event ${event.productId}");
+    if (state is ProductLoaded) {
+      final currentState = state as ProductLoaded;
+      // optimistic update for UI
+      final updatedProducts = currentState.products.map((product) {
+        if (product.id == event.productId) {
+          return product.copyWith(isFavourite: !product.isFavourite);
+        }
+        return product;
+      }).toList();
+
+      emit(currentState.copyWith(products: updatedProducts));
+      // update datasource
+      try {
+        await productRepo.toggleFavourite(event.productId);
+      } catch (e) {
+        // revert on error
+        emit(currentState);
+      }
+    }
   }
 
   Future<void> _onLoadProducts(

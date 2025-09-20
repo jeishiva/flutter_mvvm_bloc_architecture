@@ -28,6 +28,20 @@ class ProductLoaded extends ProductState {
     this.isLoadingMore = false,
   });
 
+  copyWith({
+    List<Product>? products,
+    bool? hasMore,
+    int? pageNumber,
+    bool? isLoadingMore,
+  }) {
+    return ProductLoaded(
+      products: products ?? this.products,
+      hasMore: hasMore ?? this.hasMore,
+      pageNumber: pageNumber ?? this.pageNumber,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
+
   @override
   List<Object?> get props => [products, hasMore, pageNumber, isLoadingMore];
 }

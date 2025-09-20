@@ -149,7 +149,12 @@ class ProductListWidget extends StatelessWidget {
       itemBuilder: (context, index) {
         if (index < products.length) {
           final product = products[index];
-          return ProductListItem(product: product);
+          return ProductListItem(
+            product: product,
+            onFavoriteToggle: (product) {
+              context.read<ProductBloc>().add(ToggleFavourite(product.id));
+            },
+          );
         } else {
           // loading indicator at list bottom
           return const Padding(
@@ -170,8 +175,13 @@ class ProductListWidget extends StatelessWidget {
 
 class ProductListItem extends StatelessWidget {
   final Product product;
+  final ValueChanged<Product> onFavoriteToggle;
 
-  const ProductListItem({super.key, required this.product});
+  const ProductListItem({
+    super.key,
+    required this.product,
+    required this.onFavoriteToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -206,6 +216,19 @@ class ProductListItem extends StatelessWidget {
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
+        ),
+        trailing: IconButton(
+          onPressed: () => onFavoriteToggle(product),
+          icon: Icon(
+            product.isFavourite ? Icons.favorite : Icons.favorite_border,
+            color: product.isFavourite
+                ? Colors.red
+                : theme.colorScheme.onSurfaceVariant,
+            size: 24,
+          ),
+          tooltip: product.isFavourite
+              ? 'Remove from favorites'
+              : 'Add to favorites',
         ),
       ),
     );

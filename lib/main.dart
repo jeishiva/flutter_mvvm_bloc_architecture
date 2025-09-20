@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mvvm_bloc_architecture/di/injector.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/pages/favourite_page.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/pages/product_page.dart';
 
 void main() {
@@ -17,24 +18,59 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
       ),
-      home: const ProductPage(),
+      home: ResponsiveView(),
     );
   }
 }
 
-class MultiDevicePage extends StatelessWidget {
-  const MultiDevicePage({super.key});
 
+class ResponsiveView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth < 600) {
-          return const PhonePage();
+        bool isTablet = constraints.maxWidth > 600;
+        if (isTablet) {
+          return Row(
+            children: [
+              Expanded(flex: 1, child: ProductPage()),
+              Expanded(flex: 1, child: FavouritePage()),
+            ],
+          );
         } else {
-          return const TabletPage();
+          // Phone: Bottom navigation
+          return BottomNavigationScaffold();
         }
       },
+    );
+  }
+}
+
+class BottomNavigationScaffold extends StatefulWidget {
+  @override
+  _BottomNavigationScaffoldState createState() => _BottomNavigationScaffoldState();
+}
+
+class _BottomNavigationScaffoldState extends State<BottomNavigationScaffold> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _pages = [
+    ProductPage(),
+    FavouritePage()
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) => setState(() => _selectedIndex = index),
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favourite'),
+        ],
+      ),
     );
   }
 }

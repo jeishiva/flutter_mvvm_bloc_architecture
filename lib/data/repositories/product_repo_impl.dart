@@ -11,11 +11,6 @@ class ProductRepositoryImpl implements ProductRepository {
   const ProductRepositoryImpl({required this.localDataSource});
 
   @override
-  Future<void> addProduct(Product product) async {
-    await localDataSource.addProduct(ProductModel.fromEntity(product));
-  }
-
-  @override
   Future<PageResult<Product>> getAllProducts({
     required int pageNumber,
     required int limit,
@@ -29,5 +24,12 @@ class ProductRepositoryImpl implements ProductRepository {
       pageNumber: pageResult.pageNumber,
     );
     return result;
+  }
+
+  @override
+  Future<Product> toggleFavourite(String productId) async {
+    return localDataSource
+        .toggleFavourite(productId)
+        .then((model) => model.toEntity());
   }
 }

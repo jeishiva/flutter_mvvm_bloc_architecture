@@ -8,5 +8,5 @@ abstract class ProductRepository {
     required int offset,
   });
 
-  Future<void> addProduct(Product product);
+  Future<Product> toggleFavourite(String productId);
 }

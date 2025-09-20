@@ -12,11 +12,11 @@ abstract class ProductLocalDataSource {
     required int offset,
   });
 
-  Future<void> addProduct(ProductModel product);
+  Future<ProductModel> toggleFavourite(String productId);
 }
 
 class ProductLocalDataSourceImpl implements ProductLocalDataSource {
-  final List<ProductModel> _productList = [];
+  List<ProductModel> _productList = [];
 
   Future<void> _loadProductsIfNeeded() async {
     if (_productList.isNotEmpty) {
@@ -25,11 +25,6 @@ class ProductLocalDataSourceImpl implements ProductLocalDataSource {
     final jsonString = await rootBundle.loadString('assets/data/products.json');
     final List<dynamic> jsonList = json.decode(jsonString);
     _productList.addAll(jsonList.map((e) => ProductModel.fromJson(e)).toList());
-  }
-
-  @override
-  Future<void> addProduct(ProductModel product) async {
-    _productList.insert(0, product);
   }
 
   @override
@@ -50,4 +45,20 @@ class ProductLocalDataSourceImpl implements ProductLocalDataSource {
     await Future.delayed(const Duration(seconds: 2));
     return PageResult(data: items, hasMore: hasMore, pageNumber: pageNumber);
   }
+
+  @override
+  Future<ProductModel> toggleFavourite(String productId) async {
+    final newList = _productList.map((p) {
+      if (p.id == productId) {
+        return p.copyWith(isFavourite: !p.isFavourite);
+      }
+      return p;
+    }).toList();
+    final updated = newList.firstWhere((p) => p.id == productId);
+    _productList = newList;
+    await Future.delayed(Duration(milliseconds: 200));
+    return updated;
+  }
+
+
 }

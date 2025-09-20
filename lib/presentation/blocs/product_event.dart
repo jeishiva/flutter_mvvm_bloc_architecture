@@ -9,4 +9,9 @@ abstract class ProductEvent extends Equatable {
 
 class LoadProducts extends ProductEvent {}
 
+class ToggleFavourite extends ProductEvent {
+  final String productId;
+  const ToggleFavourite(this.productId);
+}
+
 class LoadMore extends ProductEvent {}
