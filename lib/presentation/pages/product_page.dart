@@ -108,7 +108,7 @@ class ProductBody extends StatelessWidget {
               controller: controller,
             ),
 
-          ProductError(:final message) => ProductErrorWidget(message: message),
+          ProductError(errorMessage:final message) => ProductErrorWidget(message: message),
 
           _ => const SizedBox.shrink(),
         };

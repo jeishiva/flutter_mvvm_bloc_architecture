@@ -3,9 +3,8 @@ import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
 
 abstract class ProductRepository {
   Future<PageResult<Product>> getAllProducts({
-    required int pageNumber,
     required int limit,
-    required int offset,
+    String? nextCursor,
   });
 
   Future<Product> toggleFavourite(String productId);

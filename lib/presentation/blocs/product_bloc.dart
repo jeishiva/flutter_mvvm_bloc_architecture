@@ -53,19 +53,20 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       return;
     }
     _isLoadingPage = true;
-    final previous = state is ProductLoaded
-        ? List<Product>.from((state as ProductLoaded).products)
-        : state is ProductError
-        ? List<Product>.from((state as ProductError).products)
+
+    final currentState = state is ProductStateWithData
+        ? state as ProductStateWithData
+        : null;
+
+    final previous = currentState != null
+        ? List<Product>.from(currentState.products)
         : <Product>[];
-    final page = state is ProductLoaded
-        ? (state as ProductLoaded).pageNumber + 1
-        : state is ProductError
-        ? (state as ProductError).pageNumber + 1
-        : 1;
+
+    final nextCursor = currentState?.nextCursor;
+    final hasMore = currentState?.hasMore ?? true;
 
     // emit appropriate loading indicator
-    if (page == 1) {
+    if (currentState == null) {
       emit(const ProductLoading());
     } else {
       final prevHasMore = state is ProductLoaded
@@ -75,16 +76,15 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         ProductLoaded(
           products: previous,
           hasMore: prevHasMore,
-          pageNumber: page - 1,
           isLoadingMore: true,
+          nextCursor: nextCursor,
         ),
       );
     }
     try {
       final pageResult = await productRepo.getAllProducts(
-        pageNumber: page,
+        nextCursor: nextCursor,
         limit: 20,
-        offset: (page - 1) * 20,
       );
       final incoming = pageResult.data;
       final existingIds = previous.map((item) => item.id).toSet();
@@ -96,13 +96,20 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         ProductLoaded(
           products: combined,
           hasMore: pageResult.hasMore,
-          pageNumber: pageResult.pageNumber,
+          nextCursor: pageResult.nextCursor,
           isLoadingMore: false,
         ),
       );
     } catch (e) {
       final msg = e.toString();
-      emit(ProductError(message: msg, products: previous, pageNumber: page));
+      emit(
+        ProductError(
+          errorMessage: msg,
+          products: previous,
+          nextCursor: nextCursor,
+          hasMore: hasMore,
+        ),
+      );
     } finally {
       _isLoadingPage = false;
     }

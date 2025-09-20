@@ -12,16 +12,15 @@ class ProductRepositoryImpl implements ProductRepository {
 
   @override
   Future<PageResult<Product>> getAllProducts({
-    required int pageNumber,
     required int limit,
-    required int offset,
+    String? nextCursor,
   }) async {
     final PageResult<ProductModel> pageResult = await localDataSource
-        .getAllProducts(pageNumber: pageNumber, limit: limit, offset: offset);
+        .getAllProducts(cursor: nextCursor, limit: limit);
     final PageResult<Product> result = PageResult(
       data: pageResult.data.map((model) => model.toEntity()).toList(),
       hasMore: pageResult.hasMore,
-      pageNumber: pageResult.pageNumber,
+      nextCursor: pageResult.nextCursor,
     );
     return result;
   }
