@@ -1,4 +1,4 @@
-import 'dart:ffi';
+import 'dart:async';
 
 import 'package:flutter_mvvm_bloc_architecture/data/datasources/product_local_data_source.dart';
 import 'package:flutter_mvvm_bloc_architecture/data/models/product_model.dart';
@@ -9,9 +9,16 @@ import 'package:flutter_mvvm_bloc_architecture/domain/entities/product_filter.da
 import '../../domain/repositories/product_repo.dart';
 
 class ProductRepositoryImpl implements ProductRepository {
-  final ProductLocalDataSource localDataSource;
+  @override
+  Stream<Product> get changes => _changes.stream;
 
-  const ProductRepositoryImpl({required this.localDataSource});
+  final ProductLocalDataSource localDataSource;
+  final StreamController<Product> _changes;
+
+  ProductRepositoryImpl({
+    required this.localDataSource,
+    required StreamController<Product> changesController,
+  }) : _changes = changesController;
 
   @override
   Future<PageResult<Product>> getAllProducts({
@@ -41,5 +48,10 @@ class ProductRepositoryImpl implements ProductRepository {
   @override
   Future<void> initialize() {
     return localDataSource.initialize();
+  }
+
+  @override
+  void dispose() {
+    _changes.close();
   }
 }

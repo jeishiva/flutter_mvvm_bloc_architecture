@@ -1,4 +1,6 @@
 // product_bloc.dart
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
@@ -7,18 +9,59 @@ import 'package:flutter_mvvm_bloc_architecture/domain/repositories/product_repo.
 import 'package:flutter_mvvm_bloc_architecture/utils/log_manager.dart';
 
 part 'product_event.dart';
+
 part 'product_state.dart';
 
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
   final ProductRepository productRepo;
-
-  // prevents concurrent page loads
+  StreamSubscription<Product>? _repoSub;
   bool _isLoadingPage = false;
 
   ProductBloc(this.productRepo) : super(const ProductInitial()) {
     on<LoadProducts>(_onLoadProducts);
     on<LoadMore>(_onLoadMore);
     on<ToggleFavourite>(_onToggleFavourite);
+    on<_ExternalProductChanged>(_onExternalProductChanged);
+
+    _repoSub = productRepo.changes.listen((updatedProduct) {
+      add(_ExternalProductChanged(updatedProduct));
+    });
+  }
+
+  FutureOr<void> _onExternalProductChanged(
+    _ExternalProductChanged event,
+    Emitter<ProductState> emit,
+  ) async {
+    final updated = event.product;
+    final current = state;
+
+    if (current is ProductStateWithData) {
+      final idx = current.products.indexWhere((p) => p.id == updated.id);
+
+      if (idx == -1) {
+        return;
+      }
+      // Build a new list with the replaced product (immutable-style)
+      final newProducts = List<Product>.from(current.products);
+      newProducts[idx] = updated;
+
+      // Emit preserving concrete state type where possible
+      if (current is ProductLoaded) {
+        emit(current.copyWith(products: newProducts));
+      } else if (current is ProductError) {
+        emit(current.copyWith(products: newProducts));
+      } else {
+        emit(
+          ProductLoaded(
+            products: newProducts,
+            hasMore: current.hasMore,
+            nextCursor: current.nextCursor,
+            isLoadingMore: false,
+            productFilter: current.productFilter,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _onLoadMore(LoadMore event, Emitter<ProductState> emit) async {
@@ -48,10 +91,14 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     }
     _isLoadingPage = true;
 
-    final currentState = state is ProductStateWithData ? state as ProductStateWithData : null;
+    final currentState = state is ProductStateWithData
+        ? state as ProductStateWithData
+        : null;
     final filterChanged = currentState?.productFilter != event.productFilter;
 
-    final prevProducts = filterChanged ? <Product>[] : currentState?.products ?? [];
+    final prevProducts = filterChanged
+        ? <Product>[]
+        : currentState?.products ?? [];
     final nextCursor = filterChanged ? null : currentState?.nextCursor;
     final prevHasMore = filterChanged ? true : (currentState?.hasMore ?? true);
 
@@ -171,5 +218,10 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         }
       }
     }
+  }
+  @override
+  Future<void> close() {
+    _repoSub?.cancel();
+    return super.close();
   }
 }

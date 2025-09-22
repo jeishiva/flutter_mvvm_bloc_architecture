@@ -13,4 +13,9 @@ abstract class ProductRepository {
   });
 
   Future<void> toggleFavourite(String productId);
+
+  Stream<Product> get changes; // expose stream
+
+  void dispose();
+
 }

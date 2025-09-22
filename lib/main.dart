@@ -7,8 +7,7 @@ import 'package:flutter_mvvm_bloc_architecture/presentation/pages/product_page.d
 import 'package:flutter_mvvm_bloc_architecture/presentation/pages/splash_page.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/routes.dart';
 
-
- main() async {
+main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initInjector();
   runApp(const MyApp());
@@ -54,11 +53,14 @@ class HomePage extends StatelessWidget {
                 ),
               ),
               // Favourites
-              BlocProvider(
-                create: (_) =>
-                    getIt<ProductBloc>()
-                      ..add(const LoadProducts(ProductFilter.favourites())),
-                child: const ProductPage(),
+              Expanded(
+                flex: 1,
+                child: BlocProvider(
+                  create: (_) =>
+                      getIt<ProductBloc>()
+                        ..add(const LoadProducts(ProductFilter.favourites())),
+                  child: const ProductPage(),
+                ),
               ),
             ],
           );
@@ -91,19 +93,15 @@ class _BottomNavigationScaffoldState extends State<BottomNavigationScaffold> {
   @override
   void initState() {
     super.initState();
-    _homeBloc = getIt<ProductBloc>()..add(const LoadProducts(ProductFilter.noFilters()));
-    _favBloc = getIt<ProductBloc>()..add(const LoadProducts(ProductFilter.favourites()));
+    _homeBloc = getIt<ProductBloc>()
+      ..add(const LoadProducts(ProductFilter.noFilters()));
+    _favBloc = getIt<ProductBloc>()
+      ..add(const LoadProducts(ProductFilter.favourites()));
 
     // use wrappers that receive the bloc from parent via BlocProvider.value
     _pages.addAll([
-      BlocProvider<ProductBloc>.value(
-        value: _homeBloc,
-        child: ProductPage(),
-      ),
-      BlocProvider<ProductBloc>.value(
-        value: _favBloc,
-        child: ProductPage(),
-      ),
+      BlocProvider<ProductBloc>.value(value: _homeBloc, child: ProductPage()),
+      BlocProvider<ProductBloc>.value(value: _favBloc, child: ProductPage()),
     ]);
   }
 
@@ -137,7 +135,10 @@ class _BottomNavigationScaffoldState extends State<BottomNavigationScaffold> {
         onTap: _onTabTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favourite'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: 'Favourite',
+          ),
         ],
       ),
     );

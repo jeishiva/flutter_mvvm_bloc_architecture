@@ -22,3 +22,8 @@ class ToggleFavourite extends ProductEvent {
 class LoadMore extends ProductEvent {
   const LoadMore();
 }
+
+class _ExternalProductChanged extends ProductEvent {
+  const _ExternalProductChanged(this.product);
+  final Product product;
+}
