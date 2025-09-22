@@ -24,6 +24,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<_ExternalProductChanged>(_onExternalProductChanged);
 
     _repoSub = productRepo.changes.listen((updatedProduct) {
+      LogManager.debug("external product changed ${updatedProduct.id}");
       add(_ExternalProductChanged(updatedProduct));
     });
   }
@@ -32,18 +33,22 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     _ExternalProductChanged event,
     Emitter<ProductState> emit,
   ) async {
+    LogManager.debug("external product function called");
     final updated = event.product;
     final current = state;
 
     if (current is ProductStateWithData) {
       final idx = current.products.indexWhere((p) => p.id == updated.id);
 
-      if (idx == -1) {
-        return;
-      }
       // Build a new list with the replaced product (immutable-style)
       final newProducts = List<Product>.from(current.products);
-      newProducts[idx] = updated;
+      LogManager.debug("updated product ${updated.id}");
+
+      if (idx == -1) {
+        newProducts.add(updated);
+      } else {
+        newProducts[idx] = updated;
+      }
 
       // Emit preserving concrete state type where possible
       if (current is ProductLoaded) {
@@ -75,7 +80,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     if (!current.hasMore) {
       return;
     }
-    // dispatch a LoadProducts with same filter so the main loader handles pagination logic
     add(LoadProducts(current.productFilter));
   }
 
@@ -184,7 +188,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       } else if (currentState is ProductError) {
         emit(currentState.copyWith(products: updatedProducts));
       } else {
-        // fallback: emit ProductLoaded with optimistic list
         emit(
           ProductLoaded(
             products: updatedProducts,
@@ -219,6 +222,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       }
     }
   }
+
   @override
   Future<void> close() {
     _repoSub?.cancel();

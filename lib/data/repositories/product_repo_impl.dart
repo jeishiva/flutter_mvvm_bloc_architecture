@@ -42,16 +42,17 @@ class ProductRepositoryImpl implements ProductRepository {
 
   @override
   Future<void> toggleFavourite(String productId) async {
-    return localDataSource.toggleFavourite(productId);
+    final updated = (await localDataSource.toggleFavourite(
+      productId,
+    )).toEntity();
+    _changes.add(updated);
   }
 
   @override
-  Future<void> initialize() {
+  Future<void> initialize() async {
     return localDataSource.initialize();
   }
 
   @override
-  void dispose() {
-    _changes.close();
-  }
+  void dispose() => _changes.close();
 }

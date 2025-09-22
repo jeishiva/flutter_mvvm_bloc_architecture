@@ -97,8 +97,6 @@ class _BottomNavigationScaffoldState extends State<BottomNavigationScaffold> {
       ..add(const LoadProducts(ProductFilter.noFilters()));
     _favBloc = getIt<ProductBloc>()
       ..add(const LoadProducts(ProductFilter.favourites()));
-
-    // use wrappers that receive the bloc from parent via BlocProvider.value
     _pages.addAll([
       BlocProvider<ProductBloc>.value(value: _homeBloc, child: ProductPage()),
       BlocProvider<ProductBloc>.value(value: _favBloc, child: ProductPage()),
@@ -115,9 +113,6 @@ class _BottomNavigationScaffoldState extends State<BottomNavigationScaffold> {
 
   void _onTabTapped(int index) {
     setState(() => _selectedIndex = index);
-
-    // When the tab becomes visible, trigger a fresh load for that filter.
-    // This ensures favourites page reloads when user switches to it.
     if (index == 0) {
       _homeBloc.add(const LoadProducts(ProductFilter.noFilters()));
     } else if (index == 1) {
@@ -128,7 +123,6 @@ class _BottomNavigationScaffoldState extends State<BottomNavigationScaffold> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // keep pages mounted/preserved
       body: IndexedStack(index: _selectedIndex, children: _pages),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,

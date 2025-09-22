@@ -17,7 +17,7 @@ abstract class ProductLocalDataSource {
     required ProductFilter productFilter,
   });
 
-  Future<void> toggleFavourite(String productId);
+  Future<ProductModel> toggleFavourite(String productId);
 }
 
 class ProductLocalDataSourceImpl implements ProductLocalDataSource {
@@ -87,15 +87,21 @@ class ProductLocalDataSourceImpl implements ProductLocalDataSource {
   }
 
   @override
-  Future<void> toggleFavourite(String productId) async {
+  Future<ProductModel> toggleFavourite(String productId) async {
+    ProductModel? updated;
     final newList = _productList.map((p) {
       if (p.id == productId) {
-        return p.copyWith(isFavourite: !p.isFavourite);
+        updated = p.copyWith(isFavourite: !p.isFavourite);
+        return updated!;
       }
       return p;
     }).toList();
     _productList = newList;
     await Future.delayed(const Duration(milliseconds: 200));
+    if (updated == null) {
+      throw Exception("Product with id $productId not found");
+    }
+    return updated!;
   }
 
   // Helper method with all filter conditions
