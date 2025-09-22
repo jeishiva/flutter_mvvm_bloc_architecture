@@ -24,7 +24,6 @@ class _ProductsPageState extends State<ProductPage> {
   bool _isLoadingMore = false;
   bool _hasMore = true;
   final _scrollSubject = PublishSubject<void>();
-  late BaseProductBloc _bloc;
 
   @override
   void initState() {
@@ -85,7 +84,7 @@ class _ProductsPageState extends State<ProductPage> {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _scrollSubject.close();
-      super.dispose();
+    super.dispose();
   }
 }
 
