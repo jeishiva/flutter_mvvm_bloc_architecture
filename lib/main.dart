@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/di/injector.dart';
-import 'package:flutter_mvvm_bloc_architecture/presentation/pages/favourite_page.dart';
+import 'package:flutter_mvvm_bloc_architecture/domain/entities/product_filter.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/pages/product_page.dart';
 
 void main() {
@@ -18,13 +20,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
       ),
-      home: ResponsiveView(),
+      home: const ResponsiveView(),
     );
   }
 }
 
-
 class ResponsiveView extends StatelessWidget {
+  const ResponsiveView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -33,13 +36,27 @@ class ResponsiveView extends StatelessWidget {
         if (isTablet) {
           return Row(
             children: [
-              Expanded(flex: 1, child: ProductPage()),
-              Expanded(flex: 1, child: FavouritePage()),
+              Expanded(
+                flex: 1,
+                child: BlocProvider(
+                  create: (_) =>
+                      getIt<ProductBloc>()
+                        ..add(const LoadProducts(ProductFilter.favourites())),
+                  child: const ProductPage(),
+                ),
+              ),
+              // Favourites
+              BlocProvider(
+                create: (_) =>
+                    getIt<ProductBloc>()
+                      ..add(const LoadProducts(ProductFilter.favourites())),
+                child: const ProductPage(),
+              ),
             ],
           );
         } else {
           // Phone: Bottom navigation
-          return BottomNavigationScaffold();
+          return const BottomNavigationScaffold();
         }
       },
     );
@@ -47,172 +64,50 @@ class ResponsiveView extends StatelessWidget {
 }
 
 class BottomNavigationScaffold extends StatefulWidget {
+  const BottomNavigationScaffold({super.key});
+
   @override
-  _BottomNavigationScaffoldState createState() => _BottomNavigationScaffoldState();
+  _BottomNavigationScaffoldState createState() =>
+      _BottomNavigationScaffoldState();
 }
 
 class _BottomNavigationScaffoldState extends State<BottomNavigationScaffold> {
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = [
-    ProductPage(),
-    FavouritePage()
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_selectedIndex],
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: [
+          // Home (no filters)
+          BlocProvider(
+            create: (_) =>
+                getIt<ProductBloc>()
+                  ..add(const LoadProducts(ProductFilter.noFilters())),
+            child: const ProductPage(),
+          ),
+
+          // Favourites
+          BlocProvider(
+            create: (_) =>
+                getIt<ProductBloc>()
+                  ..add(const LoadProducts(ProductFilter.favourites())),
+            child: const ProductPage(),
+          ),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (index) => setState(() => _selectedIndex = index),
-        items: [
+        items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favourite'),
-        ],
-      ),
-    );
-  }
-}
-
-class PhonePage extends StatelessWidget {
-  const PhonePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        children: [
-          Flexible(flex: 1, child: Container(color: Colors.green)),
-          Flexible(
-            flex: 1,
-            child: Row(
-              children: [
-                Flexible(flex: 1, child: Container(color: Colors.blue)),
-                Flexible(flex: 1, child: Container(color: Colors.lightGreen)),
-              ],
-            ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: 'Favourite',
           ),
         ],
       ),
-    );
-  }
-}
-
-class TabletPage extends StatelessWidget {
-  const TabletPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                // small
-                Flexible(
-                  flex: 1,
-                  fit: FlexFit.tight,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Flexible(
-                        child: Container(
-                          alignment: Alignment.topCenter,
-                          padding: EdgeInsets.all(8),
-                          child: Container(
-                            color: Colors.red,
-                            height: 50,
-                          ),
-                        ),
-                      ),
-                      Flexible(
-                        child: Container(
-                          width: 100,
-                          alignment: Alignment.center,
-                          padding: EdgeInsets.all(8),
-                          child: Container(
-                            color: Colors.green,
-                            height: 50,
-                          ),
-                        ),
-                      ),
-                      Flexible(
-                        child: Container(
-                          alignment: Alignment.bottomRight,
-                          padding: EdgeInsets.all(8),
-                          child: Container(
-                            color: Colors.cyan,
-                            height: 50,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(child: Container(color: Colors.blue)),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Flexible(flex: 1, child: Container(color: Colors.red)),
-                Flexible(flex: 1, child: Container(color: Colors.amber)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

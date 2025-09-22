@@ -141,8 +141,8 @@ class ProductLocalDataSourceImpl implements ProductLocalDataSource {
   }
 
   // Updated helper method with all filter conditions
-  List<ProductModel> _getFilteredProducts(ProductFilter? filter) {
-    if (filter == null || !filter.hasFilters) {
+  List<ProductModel> _getFilteredProducts(ProductFilter filter) {
+    if (!filter.hasFilters) {
       return List.from(_productList);
     }
 

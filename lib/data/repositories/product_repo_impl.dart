@@ -18,7 +18,11 @@ class ProductRepositoryImpl implements ProductRepository {
     required ProductFilter productFilter,
   }) async {
     final PageResult<ProductModel> pageResult = await localDataSource
-        .getAllProducts(cursor: nextCursor, limit: limit, productFilter: productFilter);
+        .getAllProducts(
+          cursor: nextCursor,
+          limit: limit,
+          productFilter: productFilter,
+        );
     final PageResult<Product> result = PageResult(
       data: pageResult.data.map((model) => model.toEntity()).toList(),
       hasMore: pageResult.hasMore,

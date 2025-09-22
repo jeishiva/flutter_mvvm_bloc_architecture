@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_mvvm_bloc_architecture/di/injector.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
-import 'package:flutter_mvvm_bloc_architecture/domain/entities/product_filter.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ProductPage extends StatefulWidget {
+
   const ProductPage({super.key});
 
   @override
@@ -23,8 +22,6 @@ class _ProductsPageState extends State<ProductPage> {
   @override
   void initState() {
     super.initState();
-    _bloc = getIt<ProductBloc>();
-    _bloc.add(LoadProducts(ProductFilter.noFilters()));
     _scrollController.addListener(_onScroll);
     _scrollSubject
         .throttleTime(const Duration(milliseconds: 100)) // or debounceTime
@@ -53,34 +50,30 @@ class _ProductsPageState extends State<ProductPage> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _bloc,
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Products')),
-        body: SafeArea(
-          child: BlocListener<ProductBloc, ProductState>(
-            listener: (context, state) {
-              if (state is ProductLoaded) {
-                _hasMore = state.hasMore;
-                _isLoadingMore = false;
-              } else if (state is ProductError) {
-                _isLoadingMore = false;
-              }
-            },
-            child: ProductBody(controller: _scrollController),
-          ),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Products')),
+      body: SafeArea(
+        child: BlocListener<ProductBloc, ProductState>(
+          listener: (context, state) {
+            if (state is ProductLoaded) {
+              _hasMore = state.hasMore;
+              _isLoadingMore = false;
+            } else if (state is ProductError) {
+              _isLoadingMore = false;
+            }
+          },
+          child: ProductBody(controller: _scrollController),
         ),
       ),
     );
   }
-
   @override
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _scrollSubject.close();
-    _bloc.close();
     super.dispose();
   }
 }
@@ -109,7 +102,9 @@ class ProductBody extends StatelessWidget {
               controller: controller,
             ),
 
-          ProductError(errorMessage:final message) => ProductErrorWidget(message: message),
+          ProductError(errorMessage: final message) => ProductErrorWidget(
+            message: message,
+          ),
 
           _ => const SizedBox.shrink(),
         };

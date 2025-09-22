@@ -7,13 +7,12 @@ import 'package:flutter_mvvm_bloc_architecture/domain/repositories/product_repo.
 import 'package:flutter_mvvm_bloc_architecture/utils/log_manager.dart';
 
 part 'product_event.dart';
-
 part 'product_state.dart';
 
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
   final ProductRepository productRepo;
 
-  /// prevents concurrent page loads
+  // prevents concurrent page loads
   bool _isLoadingPage = false;
 
   ProductBloc(this.productRepo) : super(const ProductInitial()) {
@@ -40,6 +39,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     LoadProducts event,
     Emitter<ProductState> emit,
   ) async {
+    LogManager.debug('product filter ${event.productFilter}');
+
     if (_isLoadingPage) {
       LogManager.debug('already loading previous page');
       return;
