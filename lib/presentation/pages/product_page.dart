@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc.dart';
+import 'package:flutter_mvvm_bloc_architecture/utils/log_manager.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ProductPage extends StatefulWidget {
-
   const ProductPage({super.key});
 
   @override
@@ -13,7 +13,6 @@ class ProductPage extends StatefulWidget {
 }
 
 class _ProductsPageState extends State<ProductPage> {
-  late final ProductBloc _bloc;
   final ScrollController _scrollController = ScrollController();
   bool _isLoadingMore = false;
   bool _hasMore = true;
@@ -26,9 +25,10 @@ class _ProductsPageState extends State<ProductPage> {
     _scrollSubject
         .throttleTime(const Duration(milliseconds: 100)) // or debounceTime
         .listen((_) {
-          const double threshold = 300.0;
+          const double threshold = 400.0;
           final remaining = _scrollController.position.extentAfter;
           if (remaining <= threshold) {
+            LogManager.debug("threshold reached");
             _loadNextPage();
           }
         });
@@ -46,7 +46,9 @@ class _ProductsPageState extends State<ProductPage> {
       return;
     }
     _isLoadingMore = true;
-    _bloc.add(LoadMore());
+    // get bloc from context and dispatch LoadMore
+    final bloc = context.read<ProductBloc>(); // or BlocProvider.of<ProductBloc>(context, listen: false);
+    bloc.add(const LoadMore());
   }
 
   @override
@@ -57,7 +59,10 @@ class _ProductsPageState extends State<ProductPage> {
       body: SafeArea(
         child: BlocListener<ProductBloc, ProductState>(
           listener: (context, state) {
-            if (state is ProductLoaded) {
+            if (state is ProductLoading) {
+              Center(child: const CircularProgressIndicator(),);
+            }
+            else if (state is ProductLoaded) {
               _hasMore = state.hasMore;
               _isLoadingMore = false;
             } else if (state is ProductError) {
@@ -69,6 +74,7 @@ class _ProductsPageState extends State<ProductPage> {
       ),
     );
   }
+
   @override
   void dispose() {
     _scrollController.removeListener(_onScroll);

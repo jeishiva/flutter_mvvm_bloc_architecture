@@ -22,6 +22,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   }
 
   Future<void> _onLoadMore(LoadMore event, Emitter<ProductState> emit) async {
+    LogManager.debug("load more called");
     final current = state is ProductStateWithData
         ? state as ProductStateWithData
         : null;

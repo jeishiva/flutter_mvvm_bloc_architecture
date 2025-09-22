@@ -19,4 +19,6 @@ class ToggleFavourite extends ProductEvent {
   const ToggleFavourite(this.productId);
 }
 
-class LoadMore extends ProductEvent {}
+class LoadMore extends ProductEvent {
+  const LoadMore();
+}
