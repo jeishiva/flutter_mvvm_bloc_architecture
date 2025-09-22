@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter_mvvm_bloc_architecture/data/datasources/product_local_data_source.dart';
 import 'package:flutter_mvvm_bloc_architecture/data/models/product_model.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/common/pagination/page_result.dart';
@@ -32,9 +34,12 @@ class ProductRepositoryImpl implements ProductRepository {
   }
 
   @override
-  Future<Product> toggleFavourite(String productId) async {
-    return localDataSource
-        .toggleFavourite(productId)
-        .then((model) => model.toEntity());
+  Future<void> toggleFavourite(String productId) async {
+    return localDataSource.toggleFavourite(productId);
+  }
+
+  @override
+  Future<void> initialize() {
+    return localDataSource.initialize();
   }
 }

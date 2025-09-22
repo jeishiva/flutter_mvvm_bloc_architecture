@@ -46,8 +46,7 @@ class _ProductsPageState extends State<ProductPage> {
       return;
     }
     _isLoadingMore = true;
-    // get bloc from context and dispatch LoadMore
-    final bloc = context.read<ProductBloc>(); // or BlocProvider.of<ProductBloc>(context, listen: false);
+    final bloc = context.read<ProductBloc>();
     bloc.add(const LoadMore());
   }
 
@@ -60,9 +59,8 @@ class _ProductsPageState extends State<ProductPage> {
         child: BlocListener<ProductBloc, ProductState>(
           listener: (context, state) {
             if (state is ProductLoading) {
-              Center(child: const CircularProgressIndicator(),);
-            }
-            else if (state is ProductLoaded) {
+              Center(child: const CircularProgressIndicator());
+            } else if (state is ProductLoaded) {
               _hasMore = state.hasMore;
               _isLoadingMore = false;
             } else if (state is ProductError) {

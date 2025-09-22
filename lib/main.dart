@@ -4,9 +4,13 @@ import 'package:flutter_mvvm_bloc_architecture/di/injector.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product_filter.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/pages/product_page.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/pages/splash_page.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/routes.dart';
 
-void main() {
-  initInjector();
+
+ main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initInjector();
   runApp(const MyApp());
 }
 
@@ -20,13 +24,17 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
       ),
-      home: const ResponsiveView(),
+      initialRoute: Routes.splash,
+      routes: {
+        Routes.splash: (_) => const SplashPage(),
+        Routes.home: (_) => const HomePage(),
+      },
     );
   }
 }
 
-class ResponsiveView extends StatelessWidget {
-  const ResponsiveView({super.key});
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {

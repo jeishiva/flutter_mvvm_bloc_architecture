@@ -6,12 +6,16 @@ import 'package:get_it/get_it.dart';
 
 final GetIt getIt = GetIt.instance;
 
-void initInjector() {
-  getIt.registerLazySingleton<ProductLocalDataSource>(() => ProductLocalDataSourceImpl());
+Future<void> initInjector() async {
+  getIt.registerSingletonAsync<ProductLocalDataSource>(() async {
+    final ds = ProductLocalDataSourceImpl();
+    return ds;
+  });
   getIt.registerLazySingleton<ProductRepository>(
           () => ProductRepositoryImpl(localDataSource: getIt<ProductLocalDataSource>())
   );
   getIt.registerFactory<ProductBloc>(
         () => ProductBloc(getIt<ProductRepository>()),
   );
+  await getIt.allReady();
 }
