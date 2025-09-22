@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/di/injector.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product_filter.dart';
-import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/abstract_product_bloc.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_all_bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/pages/product_page.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/pages/splash_page.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/routes.dart';
@@ -47,9 +48,9 @@ class HomePage extends StatelessWidget {
                 flex: 1,
                 child: BlocProvider(
                   create: (_) =>
-                      getIt<ProductBloc>()
+                      getIt<BaseProductBloc>(param1: 'all')
                         ..add(const LoadProducts(ProductFilter.noFilters())),
-                  child: const ProductPage(),
+                  child: const ProductPage.home(),
                 ),
               ),
               // Favourites
@@ -57,9 +58,9 @@ class HomePage extends StatelessWidget {
                 flex: 1,
                 child: BlocProvider(
                   create: (_) =>
-                      getIt<ProductBloc>()
+                      getIt<BaseProductBloc>(param1: 'fav')
                         ..add(const LoadProducts(ProductFilter.favourites())),
-                  child: const ProductPage(),
+                  child: const ProductPage.favourites(),
                 ),
               ),
             ],
@@ -85,21 +86,27 @@ class _BottomNavigationScaffoldState extends State<BottomNavigationScaffold> {
   int _selectedIndex = 0;
 
   // create per-tab blocs so parent can trigger loads when needed
-  late final ProductBloc _homeBloc;
-  late final ProductBloc _favBloc;
+  late final BaseProductBloc _homeBloc;
+  late final BaseProductBloc _favBloc;
 
   final List<Widget> _pages = [];
 
   @override
   void initState() {
     super.initState();
-    _homeBloc = getIt<ProductBloc>()
+    _homeBloc = getIt<BaseProductBloc>(param1: 'all')
       ..add(const LoadProducts(ProductFilter.noFilters()));
-    _favBloc = getIt<ProductBloc>()
+    _favBloc = getIt<BaseProductBloc>(param1: 'fav')
       ..add(const LoadProducts(ProductFilter.favourites()));
     _pages.addAll([
-      BlocProvider<ProductBloc>.value(value: _homeBloc, child: ProductPage()),
-      BlocProvider<ProductBloc>.value(value: _favBloc, child: ProductPage()),
+      BlocProvider<BaseProductBloc>.value(
+        value: _homeBloc,
+        child: const ProductPage.home(),
+      ),
+      BlocProvider<BaseProductBloc>.value(
+        value: _favBloc,
+        child: const ProductPage.favourites(),
+      ),
     ]);
   }
 

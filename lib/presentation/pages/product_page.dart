@@ -1,22 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
-import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/abstract_product_bloc.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_all_bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/utils/log_manager.dart';
 import 'package:rxdart/rxdart.dart';
 
-class ProductPage extends StatefulWidget {
-  const ProductPage({super.key});
+class ProductPage<T extends BaseProductBloc> extends StatefulWidget {
+  final String pageTitle;
+
+  const ProductPage({super.key, required this.pageTitle});
+
+  const ProductPage.home() : this(pageTitle: "Products");
+
+  const ProductPage.favourites() : this(pageTitle: "Favourites");
 
   @override
-  State<StatefulWidget> createState() => _ProductsPageState();
+  State<StatefulWidget> createState() => _ProductsPageState<T>();
 }
 
-class _ProductsPageState extends State<ProductPage> {
+class _ProductsPageState<T extends BaseProductBloc> extends State<ProductPage> {
   final ScrollController _scrollController = ScrollController();
   bool _isLoadingMore = false;
   bool _hasMore = true;
   final _scrollSubject = PublishSubject<void>();
+  late T bloc;
 
   @override
   void initState() {
@@ -46,17 +54,16 @@ class _ProductsPageState extends State<ProductPage> {
       return;
     }
     _isLoadingMore = true;
-    final bloc = context.read<ProductBloc>();
+    final bloc = context.read<T>();
     bloc.add(const LoadMore());
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Products')),
+      appBar: AppBar(title: Text(widget.pageTitle)),
       body: SafeArea(
-        child: BlocListener<ProductBloc, ProductState>(
+        child: BlocListener<T, ProductState>(
           listener: (context, state) {
             if (state is ProductLoading) {
               Center(child: const CircularProgressIndicator());
@@ -67,7 +74,7 @@ class _ProductsPageState extends State<ProductPage> {
               _isLoadingMore = false;
             }
           },
-          child: ProductBody(controller: _scrollController),
+          child: ProductBody<T>(controller: _scrollController),
         ),
       ),
     );
@@ -82,14 +89,14 @@ class _ProductsPageState extends State<ProductPage> {
   }
 }
 
-class ProductBody extends StatelessWidget {
+class ProductBody<T extends BaseProductBloc> extends StatelessWidget {
   final ScrollController? controller;
 
   const ProductBody({super.key, this.controller});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ProductBloc, ProductState>(
+    return BlocBuilder<T, ProductState>(
       builder: (context, state) {
         return switch (state) {
           ProductLoading() => const ProductLoadingWidget(),
@@ -99,7 +106,7 @@ class ProductBody extends StatelessWidget {
             :final hasMore,
             :final isLoadingMore,
           ) =>
-            ProductListWidget(
+            ProductListWidget<T>(
               products: products,
               hasMore: hasMore,
               isLoadingMore: isLoadingMore,
@@ -126,7 +133,7 @@ class ProductLoadingWidget extends StatelessWidget {
   }
 }
 
-class ProductListWidget extends StatelessWidget {
+class ProductListWidget<T extends BaseProductBloc> extends StatelessWidget {
   final List<Product> products;
   final bool hasMore;
   final ScrollController? controller;
@@ -152,7 +159,7 @@ class ProductListWidget extends StatelessWidget {
           return ProductListItem(
             product: product,
             onFavoriteToggle: (product) {
-              context.read<ProductBloc>().add(ToggleFavourite(product.id));
+              context.read<T>().add(ToggleFavourite(product.id));
             },
           );
         } else {

@@ -1,4 +1,4 @@
-part of 'product_bloc.dart';
+part of 'product_all_bloc.dart';
 
 abstract class ProductEvent extends Equatable {
   const ProductEvent();
@@ -23,7 +23,7 @@ class LoadMore extends ProductEvent {
   const LoadMore();
 }
 
-class _ExternalProductChanged extends ProductEvent {
-  const _ExternalProductChanged(this.product);
+class ExternalProductChanged extends ProductEvent {
+  const ExternalProductChanged(this.product);
   final Product product;
 }

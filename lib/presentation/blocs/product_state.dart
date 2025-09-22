@@ -1,4 +1,4 @@
-part of 'product_bloc.dart';
+part of 'product_all_bloc.dart';
 
 
 
