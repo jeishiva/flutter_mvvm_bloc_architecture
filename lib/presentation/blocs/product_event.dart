@@ -7,10 +7,15 @@ abstract class ProductEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class LoadProducts extends ProductEvent {}
+class LoadProducts extends ProductEvent {
+  const LoadProducts(this.productFilter);
+
+  final ProductFilter productFilter;
+}
 
 class ToggleFavourite extends ProductEvent {
   final String productId;
+
   const ToggleFavourite(this.productId);
 }
 

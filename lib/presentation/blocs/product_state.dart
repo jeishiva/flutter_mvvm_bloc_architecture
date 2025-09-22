@@ -1,5 +1,7 @@
 part of 'product_bloc.dart';
 
+
+
 abstract class ProductState extends Equatable {
   const ProductState();
 
@@ -19,12 +21,15 @@ abstract class ProductStateWithData extends ProductState {
   final List<Product> products;
   final bool hasMore;
   final String? nextCursor;
+  final ProductFilter productFilter;
 
   const ProductStateWithData({
     required this.products,
     required this.hasMore,
+    required this.productFilter,
     this.nextCursor,
   });
+
 }
 
 class ProductLoaded extends ProductStateWithData {
@@ -33,37 +38,29 @@ class ProductLoaded extends ProductStateWithData {
   const ProductLoaded({
     required super.products,
     required super.hasMore,
+    required super.productFilter,
     super.nextCursor,
     this.isLoadingMore = false,
   });
 
-  /// Creates a copy of this [ProductLoaded] with the given fields replaced
   ProductLoaded copyWith({
     List<Product>? products,
     bool? hasMore,
     String? nextCursor,
     bool? isLoadingMore,
+    ProductFilter? productFilter,
   }) {
     return ProductLoaded(
       products: products ?? this.products,
       hasMore: hasMore ?? this.hasMore,
       nextCursor: nextCursor ?? this.nextCursor,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      productFilter: productFilter ?? this.productFilter,
     );
   }
 
   @override
-  List<Object?> get props => [products, hasMore, nextCursor, isLoadingMore];
-
-  @override
-  String toString() {
-    return 'ProductLoaded('
-        'products: ${products.length} items, '
-        'hasMore: $hasMore, '
-        'nextCursor: $nextCursor, '
-        'isLoadingMore: $isLoadingMore'
-        ')';
-  }
+  List<Object?> get props => [products, hasMore, nextCursor, isLoadingMore, productFilter];
 }
 
 class ProductError extends ProductStateWithData {
@@ -73,34 +70,26 @@ class ProductError extends ProductStateWithData {
     required this.errorMessage,
     super.products = const <Product>[],
     super.hasMore = false,
+    required super.productFilter,
     super.nextCursor,
   });
 
-  /// Creates a copy of this [ProductError] with the given fields replaced
   ProductError copyWith({
     String? errorMessage,
     List<Product>? products,
     bool? hasMore,
     String? nextCursor,
+    ProductFilter? productFilter,
   }) {
     return ProductError(
       errorMessage: errorMessage ?? this.errorMessage,
       products: products ?? this.products,
       hasMore: hasMore ?? this.hasMore,
       nextCursor: nextCursor ?? this.nextCursor,
+      productFilter: productFilter ?? this.productFilter,
     );
   }
 
   @override
-  List<Object?> get props => [errorMessage, products, hasMore, nextCursor];
-
-  @override
-  String toString() {
-    return 'ProductError('
-        'errorMessage: $errorMessage, '
-        'products: ${products.length} items, '
-        'hasMore: $hasMore, '
-        'nextCursor: $nextCursor'
-        ')';
-  }
+  List<Object?> get props => [errorMessage, products, hasMore, nextCursor, productFilter];
 }

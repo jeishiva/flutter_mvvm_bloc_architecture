@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/di/injector.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
+import 'package:flutter_mvvm_bloc_architecture/domain/entities/product_filter.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -23,12 +24,12 @@ class _ProductsPageState extends State<ProductPage> {
   void initState() {
     super.initState();
     _bloc = getIt<ProductBloc>();
-    _bloc.add(LoadProducts());
+    _bloc.add(LoadProducts(ProductFilter.noFilters()));
     _scrollController.addListener(_onScroll);
     _scrollSubject
         .throttleTime(const Duration(milliseconds: 100)) // or debounceTime
         .listen((_) {
-          const double threshold = 400.0;
+          const double threshold = 300.0;
           final remaining = _scrollController.position.extentAfter;
           if (remaining <= threshold) {
             _loadNextPage();
@@ -48,7 +49,7 @@ class _ProductsPageState extends State<ProductPage> {
       return;
     }
     _isLoadingMore = true;
-    _bloc.add(LoadProducts());
+    _bloc.add(LoadMore());
   }
 
   @override

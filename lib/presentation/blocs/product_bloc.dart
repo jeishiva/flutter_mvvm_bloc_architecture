@@ -1,6 +1,7 @@
+// product_bloc.dart
+import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
-import 'package:bloc/bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product_filter.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/repositories/product_repo.dart';
 import 'package:flutter_mvvm_bloc_architecture/utils/log_manager.dart';
@@ -12,37 +13,27 @@ part 'product_state.dart';
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
   final ProductRepository productRepo;
 
+  /// prevents concurrent page loads
   bool _isLoadingPage = false;
 
-  ProductBloc(this.productRepo) : super(ProductInitial()) {
+  ProductBloc(this.productRepo) : super(const ProductInitial()) {
     on<LoadProducts>(_onLoadProducts);
+    on<LoadMore>(_onLoadMore);
     on<ToggleFavourite>(_onToggleFavourite);
   }
 
-  Future<void> _onToggleFavourite(
-    ToggleFavourite event,
-    Emitter<ProductState> emit,
-  ) async {
-    LogManager.debug("favourite clicked for event ${event.productId}");
-    if (state is ProductLoaded) {
-      final currentState = state as ProductLoaded;
-      // optimistic update for UI
-      final updatedProducts = currentState.products.map((product) {
-        if (product.id == event.productId) {
-          return product.copyWith(isFavourite: !product.isFavourite);
-        }
-        return product;
-      }).toList();
-
-      emit(currentState.copyWith(products: updatedProducts));
-      // update datasource
-      try {
-        await productRepo.toggleFavourite(event.productId);
-      } catch (e) {
-        // revert on error
-        emit(currentState);
-      }
+  Future<void> _onLoadMore(LoadMore event, Emitter<ProductState> emit) async {
+    final current = state is ProductStateWithData
+        ? state as ProductStateWithData
+        : null;
+    if (current == null) {
+      return;
     }
+    if (!current.hasMore) {
+      return;
+    }
+    // dispatch a LoadProducts with same filter so the main loader handles pagination logic
+    add(LoadProducts(current.productFilter));
   }
 
   Future<void> _onLoadProducts(
@@ -55,65 +46,128 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     }
     _isLoadingPage = true;
 
-    final currentState = state is ProductStateWithData
-        ? state as ProductStateWithData
-        : null;
+    final currentState = state is ProductStateWithData ? state as ProductStateWithData : null;
+    final filterChanged = currentState?.productFilter != event.productFilter;
 
-    final previous = currentState != null
-        ? List<Product>.from(currentState.products)
-        : <Product>[];
+    final prevProducts = filterChanged ? <Product>[] : currentState?.products ?? [];
+    final nextCursor = filterChanged ? null : currentState?.nextCursor;
+    final prevHasMore = filterChanged ? true : (currentState?.hasMore ?? true);
 
-    final nextCursor = currentState?.nextCursor;
-    final hasMore = currentState?.hasMore ?? true;
-
-    // emit appropriate loading indicator
-    if (currentState == null) {
+    // emit pre-load state
+    if (currentState == null || filterChanged) {
       emit(const ProductLoading());
     } else {
-      final prevHasMore = state is ProductLoaded
-          ? (state as ProductLoaded).hasMore
-          : true;
       emit(
         ProductLoaded(
-          products: previous,
+          products: prevProducts,
           hasMore: prevHasMore,
           isLoadingMore: true,
           nextCursor: nextCursor,
+          productFilter: event.productFilter,
         ),
       );
     }
+
     try {
       final pageResult = await productRepo.getAllProducts(
         nextCursor: nextCursor,
         limit: 20,
-        productFilter: ProductFilter.noFilters(),
+        productFilter: event.productFilter,
       );
+
       final incoming = pageResult.data;
-      final existingIds = previous.map((item) => item.id).toSet();
+      final existingIds = prevProducts.map((e) => e.id).toSet();
       final newItems = incoming
           .where((item) => !existingIds.contains(item.id))
           .toList();
-      final combined = [...previous, ...newItems];
+      final combined = [...prevProducts, ...newItems];
+
       emit(
         ProductLoaded(
           products: combined,
           hasMore: pageResult.hasMore,
           nextCursor: pageResult.nextCursor,
           isLoadingMore: false,
+          productFilter: event.productFilter,
         ),
       );
-    } catch (e) {
+    } catch (e, st) {
+      LogManager.error('failed to load products', e, st);
       final msg = e.toString();
       emit(
         ProductError(
           errorMessage: msg,
-          products: previous,
+          products: prevProducts,
           nextCursor: nextCursor,
-          hasMore: hasMore,
+          hasMore: prevHasMore,
+          productFilter: event.productFilter,
         ),
       );
     } finally {
       _isLoadingPage = false;
+    }
+  }
+
+  Future<void> _onToggleFavourite(
+    ToggleFavourite event,
+    Emitter<ProductState> emit,
+  ) async {
+    LogManager.debug("favourite clicked for event ${event.productId}");
+
+    // work when we have any state that contains data
+    if (state is ProductStateWithData) {
+      final currentState = state as ProductStateWithData;
+
+      // keep a snapshot to revert if needed
+      final previousProducts = List<Product>.from(currentState.products);
+
+      // optimistic update
+      final updatedProducts = currentState.products.map((product) {
+        if (product.id == event.productId) {
+          return product.copyWith(isFavourite: !product.isFavourite);
+        }
+        return product;
+      }).toList();
+
+      // emit updated state depending on whether current is loaded or error
+      if (currentState is ProductLoaded) {
+        emit(currentState.copyWith(products: updatedProducts));
+      } else if (currentState is ProductError) {
+        emit(currentState.copyWith(products: updatedProducts));
+      } else {
+        // fallback: emit ProductLoaded with optimistic list
+        emit(
+          ProductLoaded(
+            products: updatedProducts,
+            hasMore: currentState.hasMore,
+            nextCursor: currentState.nextCursor,
+            isLoadingMore: false,
+            productFilter: currentState.productFilter,
+          ),
+        );
+      }
+
+      // attempt remote update
+      try {
+        await productRepo.toggleFavourite(event.productId);
+      } catch (e, st) {
+        LogManager.error('toggleFavourite failed', e, st);
+        if (currentState is ProductLoaded) {
+          emit(currentState.copyWith(products: previousProducts));
+        } else if (currentState is ProductError) {
+          emit(currentState.copyWith(products: previousProducts));
+        } else {
+          emit(
+            ProductLoaded(
+              products: previousProducts,
+              hasMore: currentState.hasMore,
+              nextCursor: currentState.nextCursor,
+              isLoadingMore: false,
+              productFilter: currentState.productFilter,
+            ),
+          );
+        }
+      }
     }
   }
 }
