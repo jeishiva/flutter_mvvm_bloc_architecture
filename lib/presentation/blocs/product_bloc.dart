@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
 import 'package:bloc/bloc.dart';
+import 'package:flutter_mvvm_bloc_architecture/domain/entities/product_filter.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/repositories/product_repo.dart';
 import 'package:flutter_mvvm_bloc_architecture/utils/log_manager.dart';
 
@@ -85,6 +86,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       final pageResult = await productRepo.getAllProducts(
         nextCursor: nextCursor,
         limit: 20,
+        productFilter: ProductFilter.noFilters(),
       );
       final incoming = pageResult.data;
       final existingIds = previous.map((item) => item.id).toSet();
