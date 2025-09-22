@@ -49,7 +49,7 @@ class HomePage extends StatelessWidget {
                 child: BlocProvider(
                   create: (_) =>
                       getIt<ProductBloc>()
-                        ..add(const LoadProducts(ProductFilter.favourites())),
+                        ..add(const LoadProducts(ProductFilter.noFilters())),
                   child: const ProductPage(),
                 ),
               ),
@@ -82,38 +82,62 @@ class BottomNavigationScaffold extends StatefulWidget {
 class _BottomNavigationScaffoldState extends State<BottomNavigationScaffold> {
   int _selectedIndex = 0;
 
+  // create per-tab blocs so parent can trigger loads when needed
+  late final ProductBloc _homeBloc;
+  late final ProductBloc _favBloc;
+
+  final List<Widget> _pages = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _homeBloc = getIt<ProductBloc>()..add(const LoadProducts(ProductFilter.noFilters()));
+    _favBloc = getIt<ProductBloc>()..add(const LoadProducts(ProductFilter.favourites()));
+
+    // use wrappers that receive the bloc from parent via BlocProvider.value
+    _pages.addAll([
+      BlocProvider<ProductBloc>.value(
+        value: _homeBloc,
+        child: ProductPage(),
+      ),
+      BlocProvider<ProductBloc>.value(
+        value: _favBloc,
+        child: ProductPage(),
+      ),
+    ]);
+  }
+
+  @override
+  void dispose() {
+    // parent owns the blocs so close them here
+    _homeBloc.close();
+    _favBloc.close();
+    super.dispose();
+  }
+
+  void _onTabTapped(int index) {
+    setState(() => _selectedIndex = index);
+
+    // When the tab becomes visible, trigger a fresh load for that filter.
+    // This ensures favourites page reloads when user switches to it.
+    if (index == 0) {
+      _homeBloc.add(const LoadProducts(ProductFilter.noFilters()));
+    } else if (index == 1) {
+      _favBloc.add(const LoadProducts(ProductFilter.favourites()));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: [
-          // Home (no filters)
-          BlocProvider(
-            create: (_) =>
-                getIt<ProductBloc>()
-                  ..add(const LoadProducts(ProductFilter.noFilters())),
-            child: const ProductPage(),
-          ),
-
-          // Favourites
-          BlocProvider(
-            create: (_) =>
-                getIt<ProductBloc>()
-                  ..add(const LoadProducts(ProductFilter.favourites())),
-            child: const ProductPage(),
-          ),
-        ],
-      ),
+      // keep pages mounted/preserved
+      body: IndexedStack(index: _selectedIndex, children: _pages),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        onTap: (index) => setState(() => _selectedIndex = index),
+        onTap: _onTabTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Favourite',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favourite'),
         ],
       ),
     );
