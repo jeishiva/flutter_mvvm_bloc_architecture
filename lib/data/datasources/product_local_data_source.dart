@@ -26,21 +26,15 @@ class ProductLocalDataSourceImpl implements ProductLocalDataSource {
   Future<void> _loadProductsIfNeeded() async {
     if (_productList.isNotEmpty) return;
     const assetPath = 'assets/data/products.json';
-    // MUST run on main isolate: load asset string
     final jsonString = await rootBundle.loadString(assetPath);
-    // Optionally parse on background isolate to avoid blocking UI
     final List<ProductModel> parsed = await compute(_parseProductsFromJson, jsonString);
     _productList = parsed;
     LogManager.debug('Loaded ${_productList.length} products');
   }
-
-  // Top-level function for compute isolation
-  // top-level or static function for compute
   static List<ProductModel> _parseProductsFromJson(String jsonString) {
     final List<dynamic> jsonList = json.decode(jsonString) as List<dynamic>;
     return jsonList.map((e) => ProductModel.fromJson(e)).toList();
   }
-
 
   @override
   Future<PageResult<ProductModel>> getAllProducts({

@@ -9,6 +9,7 @@ final GetIt getIt = GetIt.instance;
 Future<void> initInjector() async {
   getIt.registerSingletonAsync<ProductLocalDataSource>(() async {
     final ds = ProductLocalDataSourceImpl();
+    await ds.initialize();
     return ds;
   });
   getIt.registerLazySingleton<ProductRepository>(

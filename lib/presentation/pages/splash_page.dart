@@ -24,7 +24,6 @@ class _SplashPageState extends State<SplashPage> {
   Future<void> _init() async {
     try {
       await Future.delayed(const Duration(seconds: 2));
-      await getIt<ProductRepository>().initialize();
       Navigator.pushReplacementNamed(context, Routes.home);
     } catch (e) {
        LogManager.error("app init failed");
