@@ -5,7 +5,7 @@ import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc_base.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_all_bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/common/logging/log_manager.dart';
-import 'package:flutter_mvvm_bloc_architecture/presentation/mappers/product_ui_list_mapper.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/mappers/product_ui_mapper.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/ui_models/product_ui_model.dart';
 
 class ProductFavBloc extends BaseProductBloc {
@@ -27,27 +27,27 @@ class ProductFavBloc extends BaseProductBloc {
     _emitUpdatedFavoritesState(emit, current, newProducts);
   }
 
-  List<Product> _updateFavoritesList(
+  List<ProductUiModel> _updateFavoritesList(
     List<ProductUiModel> products,
     Product updatedProduct,
   ) {
-    final newProducts = List<Product>.from(products);
+    final newProducts = List<ProductUiModel>.from(products);
     final existingIndex = newProducts.indexWhere(
       (p) => p.id == updatedProduct.id,
     );
 
     if (updatedProduct.isFavourite) {
-      _handleAddOrUpdateFavorite(newProducts, updatedProduct, existingIndex);
+      _handleAddOrUpdateFavorite(newProducts, updatedProduct.toUiModel(), existingIndex);
     } else {
-      _handleRemoveFavorite(newProducts, updatedProduct, existingIndex);
+      _handleRemoveFavorite(newProducts, updatedProduct.toUiModel(), existingIndex);
     }
 
     return newProducts;
   }
 
   void _handleAddOrUpdateFavorite(
-    List<Product> products,
-    Product updatedProduct,
+    List<ProductUiModel> products,
+    ProductUiModel updatedProduct,
     int existingIndex,
   ) {
     if (existingIndex == -1) {
@@ -62,12 +62,11 @@ class ProductFavBloc extends BaseProductBloc {
   }
 
   void _handleRemoveFavorite(
-    List<Product> products,
-    Product updatedProduct,
+    List<ProductUiModel> products,
+    ProductUiModel updatedProduct,
     int existingIndex,
   ) {
     if (existingIndex != -1) {
-      // Remove unfavorite product from favorites list
       products.removeAt(existingIndex);
       LogManager.debug("removed unfavorited product ${updatedProduct.id}");
     }
@@ -77,17 +76,16 @@ class ProductFavBloc extends BaseProductBloc {
   void _emitUpdatedFavoritesState(
     Emitter<ProductState> emit,
     ProductStateWithData currentState,
-    List<Product> products,
+    List<ProductUiModel> products,
   ) {
-    final productsUiList = products.toUiList();
     if (currentState is ProductLoaded) {
-      emit(currentState.copyWith(products: productsUiList));
+      emit(currentState.copyWith(products: products));
     } else if (currentState is ProductError) {
-      emit(currentState.copyWith(products: productsUiList));
+      emit(currentState.copyWith(products: products));
     } else {
       emit(
         ProductLoaded(
-          products: productsUiList,
+          products: products,
           hasMore: currentState.hasMore,
           nextCursor: currentState.nextCursor,
           isLoadingMore: false,
