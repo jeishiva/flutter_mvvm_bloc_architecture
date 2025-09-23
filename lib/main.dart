@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/di/injector.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product_filter.dart';
-import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/abstract_product_bloc.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc_base.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_all_bloc.dart';
-import 'package:flutter_mvvm_bloc_architecture/presentation/pages/product_page.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/pages/product_page/product_page.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/pages/splash_page.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/routes.dart';
 

@@ -5,7 +5,7 @@ class Product extends Equatable {
   final String name;
   final int price;
   final DateTime createdAt;
-  final String? description;
+  final String? label;
   final bool isFavourite;
 
   const Product({
@@ -14,7 +14,7 @@ class Product extends Equatable {
     required this.price,
     required this.createdAt,
     required this.isFavourite,
-    this.description,
+    this.label,
   });
 
   Product copyWith({
@@ -22,7 +22,7 @@ class Product extends Equatable {
     String? name,
     int? price,
     DateTime? createdAt,
-    String? description,
+    String? label,
     bool? isFavourite,
   }) {
     return Product(
@@ -31,10 +31,10 @@ class Product extends Equatable {
       price: price ?? this.price,
       createdAt: createdAt ?? this.createdAt,
       isFavourite: isFavourite ?? this.isFavourite,
-      description: description ?? this.description,
+      label: label ?? this.label,
     );
   }
 
   @override
-  List<Object?> get props => [id, name, price, isFavourite, createdAt, description];
+  List<Object?> get props => [id, name, price, isFavourite, createdAt, label];
 }

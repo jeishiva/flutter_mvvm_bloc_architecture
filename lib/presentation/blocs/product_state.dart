@@ -1,7 +1,5 @@
 part of 'product_all_bloc.dart';
 
-
-
 abstract class ProductState extends Equatable {
   const ProductState();
 
@@ -29,7 +27,6 @@ abstract class ProductStateWithData extends ProductState {
     required this.productFilter,
     this.nextCursor,
   });
-
 }
 
 class ProductLoaded extends ProductStateWithData {
@@ -60,7 +57,13 @@ class ProductLoaded extends ProductStateWithData {
   }
 
   @override
-  List<Object?> get props => [products, hasMore, nextCursor, isLoadingMore, productFilter];
+  List<Object?> get props => [
+    products,
+    hasMore,
+    nextCursor,
+    isLoadingMore,
+    productFilter,
+  ];
 }
 
 class ProductError extends ProductStateWithData {
@@ -91,5 +94,11 @@ class ProductError extends ProductStateWithData {
   }
 
   @override
-  List<Object?> get props => [errorMessage, products, hasMore, nextCursor, productFilter];
+  List<Object?> get props => [
+    errorMessage,
+    products,
+    hasMore,
+    nextCursor,
+    productFilter,
+  ];
 }

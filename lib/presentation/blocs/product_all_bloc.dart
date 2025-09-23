@@ -5,7 +5,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product_filter.dart';
-import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/abstract_product_bloc.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc_base.dart';
 import 'package:flutter_mvvm_bloc_architecture/utils/log_manager.dart';
 
 part 'product_event.dart';
@@ -17,38 +17,58 @@ class ProductAllBloc extends BaseProductBloc {
 
   @override
   FutureOr<void> onExternalProductChanged(
-    ExternalProductChanged event,
-    Emitter<ProductState> emit,
-  ) async {
+      ExternalProductChanged event,
+      Emitter<ProductState> emit,
+      ) async {
     LogManager.debug("external product function called");
+
     final updated = event.product;
     final current = state;
 
-    if (current is ProductStateWithData) {
-      final idx = current.products.indexWhere((p) => p.id == updated.id);
-      final newProducts = List<Product>.from(current.products);
-      LogManager.debug("updated product ${updated.id}");
-      if (idx == -1) {
-        newProducts.add(updated);
-      } else {
-        newProducts[idx] = updated;
-      }
-      // Emit preserving concrete state type where possible
-      if (current is ProductLoaded) {
-        emit(current.copyWith(products: newProducts));
-      } else if (current is ProductError) {
-        emit(current.copyWith(products: newProducts));
-      } else {
-        emit(
-          ProductLoaded(
-            products: newProducts,
-            hasMore: current.hasMore,
-            nextCursor: current.nextCursor,
-            isLoadingMore: false,
-            productFilter: current.productFilter,
-          ),
-        );
-      }
+    if (current is! ProductStateWithData) return;
+
+    final newProducts = _updateProductInList(current.products, updated);
+    _emitUpdatedProductState(emit, current, newProducts);
+  }
+
+  List<Product> _updateProductInList(
+      List<Product> products,
+      Product updatedProduct,
+      ) {
+    final idx = products.indexWhere((p) => p.id == updatedProduct.id);
+    final newProducts = List<Product>.from(products);
+
+    LogManager.debug("updated product ${updatedProduct.id}");
+
+    if (idx == -1) {
+      newProducts.add(updatedProduct);
+    } else {
+      newProducts[idx] = updatedProduct;
+    }
+
+    return newProducts;
+  }
+
+  void _emitUpdatedProductState(
+      Emitter<ProductState> emit,
+      ProductStateWithData currentState,
+      List<Product> products,
+      ) {
+    // Emit preserving concrete state type where possible
+    if (currentState is ProductLoaded) {
+      emit(currentState.copyWith(products: products));
+    } else if (currentState is ProductError) {
+      emit(currentState.copyWith(products: products));
+    } else {
+      emit(
+        ProductLoaded(
+          products: products,
+          hasMore: currentState.hasMore,
+          nextCursor: currentState.nextCursor,
+          isLoadingMore: false,
+          productFilter: currentState.productFilter,
+        ),
+      );
     }
   }
 }

@@ -121,7 +121,7 @@ class ProductLocalDataSourceImpl implements ProductLocalDataSource {
         final query = filter.searchQuery!.toLowerCase();
         final matchesName = product.name.toLowerCase().contains(query);
         final matchesDescription =
-            product.description?.toLowerCase().contains(query) ?? false;
+            product.label?.toLowerCase().contains(query) ?? false;
         if (matchesName && matchesDescription) {
           return true;
         }

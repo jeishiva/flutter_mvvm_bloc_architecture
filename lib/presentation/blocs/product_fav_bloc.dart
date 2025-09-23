@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
-import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/abstract_product_bloc.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc_base.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_all_bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/utils/log_manager.dart';
 
@@ -12,54 +12,85 @@ class ProductFavBloc extends BaseProductBloc {
 
   @override
   FutureOr<void> onExternalProductChanged(
-    ExternalProductChanged event,
-    Emitter<ProductState> emit,
-  ) async {
+      ExternalProductChanged event,
+      Emitter<ProductState> emit,
+      ) async {
     LogManager.debug("external product function called for favorites");
+
     final updated = event.product;
     final current = state;
 
-    if (current is ProductStateWithData) {
-      final newProducts = List<Product>.from(current.products);
-      final existingIndex = newProducts.indexWhere((p) => p.id == updated.id);
+    if (current is! ProductStateWithData) return;
 
-      if (updated.isFavourite) {
-        // Product is marked as favorite
-        if (existingIndex == -1) {
-          // Add new favorite product
-          newProducts.add(updated);
-          LogManager.debug("added favorite product ${updated.id}");
-        } else {
-          // Replace existing favorite product
-          newProducts[existingIndex] = updated;
-          LogManager.debug("updated favorite product ${updated.id}");
-        }
-      } else {
-        // Product is not marked as favorite
-        if (existingIndex != -1) {
-          // Remove unfavorited product from favorites list
-          newProducts.removeAt(existingIndex);
-          LogManager.debug("removed unfavorited product ${updated.id}");
-        }
-        // If product is not in list and not favorite, do nothing
-      }
+    final newProducts = _updateFavoritesList(current.products, updated);
+    _emitUpdatedFavoritesState(emit, current, newProducts);
+  }
 
-      // Emit preserving concrete state type where possible
-      if (current is ProductLoaded) {
-        emit(current.copyWith(products: newProducts));
-      } else if (current is ProductError) {
-        emit(current.copyWith(products: newProducts));
-      } else {
-        emit(
-          ProductLoaded(
-            products: newProducts,
-            hasMore: current.hasMore,
-            nextCursor: current.nextCursor,
-            isLoadingMore: false,
-            productFilter: current.productFilter,
-          ),
-        );
-      }
+  List<Product> _updateFavoritesList(
+      List<Product> products,
+      Product updatedProduct,
+      ) {
+    final newProducts = List<Product>.from(products);
+    final existingIndex = newProducts.indexWhere((p) => p.id == updatedProduct.id);
+
+    if (updatedProduct.isFavourite) {
+      _handleAddOrUpdateFavorite(newProducts, updatedProduct, existingIndex);
+    } else {
+      _handleRemoveFavorite(newProducts, updatedProduct, existingIndex);
+    }
+
+    return newProducts;
+  }
+
+  void _handleAddOrUpdateFavorite(
+      List<Product> products,
+      Product updatedProduct,
+      int existingIndex,
+      ) {
+    if (existingIndex == -1) {
+      // Add new favorite product
+      products.add(updatedProduct);
+      LogManager.debug("added favorite product ${updatedProduct.id}");
+    } else {
+      // Replace existing favorite product
+      products[existingIndex] = updatedProduct;
+      LogManager.debug("updated favorite product ${updatedProduct.id}");
+    }
+  }
+
+  void _handleRemoveFavorite(
+      List<Product> products,
+      Product updatedProduct,
+      int existingIndex,
+      ) {
+    if (existingIndex != -1) {
+      // Remove unfavorited product from favorites list
+      products.removeAt(existingIndex);
+      LogManager.debug("removed unfavorited product ${updatedProduct.id}");
+    }
+    // If product is not in list and not favorite, do nothing
+  }
+
+  void _emitUpdatedFavoritesState(
+      Emitter<ProductState> emit,
+      ProductStateWithData currentState,
+      List<Product> products,
+      ) {
+    // Emit preserving concrete state type where possible
+    if (currentState is ProductLoaded) {
+      emit(currentState.copyWith(products: products));
+    } else if (currentState is ProductError) {
+      emit(currentState.copyWith(products: products));
+    } else {
+      emit(
+        ProductLoaded(
+          products: products,
+          hasMore: currentState.hasMore,
+          nextCursor: currentState.nextCursor,
+          isLoadingMore: false,
+          productFilter: currentState.productFilter,
+        ),
+      );
     }
   }
 }

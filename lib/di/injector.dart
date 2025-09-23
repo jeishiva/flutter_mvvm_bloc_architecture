@@ -4,7 +4,7 @@ import 'package:flutter_mvvm_bloc_architecture/data/datasources/product_local_da
 import 'package:flutter_mvvm_bloc_architecture/data/repositories/product_repo_impl.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/repositories/product_repo.dart';
-import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/abstract_product_bloc.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc_base.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_all_bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_fav_bloc.dart';
 import 'package:get_it/get_it.dart';
