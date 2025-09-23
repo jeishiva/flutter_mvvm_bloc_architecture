@@ -1,49 +1,17 @@
-import 'dart:async';
-
-import 'package:flutter_mvvm_bloc_architecture/data/datasources/product_local_data_source.dart';
-import 'package:flutter_mvvm_bloc_architecture/data/repositories/product_repo_impl.dart';
-import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
-import 'package:flutter_mvvm_bloc_architecture/domain/repositories/product_repo.dart';
-import 'package:flutter_mvvm_bloc_architecture/domain/usecases/product/product_use_cases.dart';
-import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc_base.dart';
-import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_all_bloc.dart';
-import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_fav_bloc.dart';
+// lib/di/get_it_setup.dart
 import 'package:get_it/get_it.dart';
+import 'product_injector.dart';
 
 final GetIt getIt = GetIt.instance;
 
+/// Call this once at app startup to register modules.
+/// You can add more module registration functions (auth, analytics, etc.)
 Future<void> initInjector() async {
-  getIt.registerSingletonAsync<ProductLocalDataSource>(() async {
-    final ds = ProductLocalDataSourceImpl();
-    await ds.initialize();
-    return ds;
-  });
+  // register product module
+  await registerProductModule(getIt);
 
-  getIt.registerSingletonAsync<ProductRepository>(
-    () async {
-      return ProductRepositoryImpl(
-        localDataSource: getIt<ProductLocalDataSource>(),
-        changesController: StreamController<Product>.broadcast(),
-      );
-    },
-    dispose: (repo) => repo.dispose(),
-    dependsOn: [ProductLocalDataSource],
-  );
+  // register other modules here
 
-  getIt.registerFactory<ProductUseCases>(() {
-    return ProductUseCases.create(getIt<ProductRepository>());
-  });
-
-  getIt.registerFactoryParam<BaseProductBloc, String, void>((param1, param2) {
-    switch (param1) {
-      case 'all':
-        return ProductAllBloc(getIt<ProductUseCases>());
-      case 'fav':
-        return ProductFavBloc(getIt<ProductUseCases>());
-      default:
-        throw ArgumentError('Unknown bloc type: $param1');
-    }
-  });
-
+  // Wait for all async singletons to finish initialization
   await getIt.allReady();
 }
