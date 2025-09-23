@@ -1,9 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mvvm_bloc_architecture/di/injector.dart';
-import 'package:flutter_mvvm_bloc_architecture/domain/repositories/product_repo.dart';
+import 'package:flutter_mvvm_bloc_architecture/common/logging/log_manager.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/routes.dart';
-import 'package:flutter_mvvm_bloc_architecture/utils/log_manager.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({Key? key}) : super(key: key);

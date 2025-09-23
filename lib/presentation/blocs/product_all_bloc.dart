@@ -3,10 +3,10 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_mvvm_bloc_architecture/common/logging/log_manager.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product_filter.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc_base.dart';
-import 'package:flutter_mvvm_bloc_architecture/utils/log_manager.dart';
 
 part 'product_event.dart';
 

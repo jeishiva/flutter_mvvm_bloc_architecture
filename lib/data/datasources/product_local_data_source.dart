@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_mvvm_bloc_architecture/common/cursor/cursor_helper.dart';
+import 'package:flutter_mvvm_bloc_architecture/common/logging/log_manager.dart';
 import 'package:flutter_mvvm_bloc_architecture/data/models/product_model.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/common/pagination/page_result.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product_filter.dart';
-import 'package:flutter_mvvm_bloc_architecture/utils/cursor_helper.dart';
-import 'package:flutter_mvvm_bloc_architecture/utils/log_manager.dart';
 
 abstract class ProductLocalDataSource {
   Future<void> initialize();

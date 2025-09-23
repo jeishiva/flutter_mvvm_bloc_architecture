@@ -4,7 +4,7 @@ import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product_filter.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/repositories/product_repo.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_all_bloc.dart';
-import 'package:flutter_mvvm_bloc_architecture/utils/log_manager.dart';
+import 'package:flutter_mvvm_bloc_architecture/common/logging/log_manager.dart';
 
 abstract class BaseProductBloc extends Bloc<ProductEvent, ProductState> {
   final ProductRepository productRepo;

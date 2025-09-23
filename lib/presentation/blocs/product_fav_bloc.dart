@@ -4,9 +4,8 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc_base.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_all_bloc.dart';
-import 'package:flutter_mvvm_bloc_architecture/utils/log_manager.dart';
+import 'package:flutter_mvvm_bloc_architecture/common/logging/log_manager.dart';
 
-// product_fav_bloc.dart
 class ProductFavBloc extends BaseProductBloc {
   ProductFavBloc(super.productRepo);
 
@@ -64,7 +63,7 @@ class ProductFavBloc extends BaseProductBloc {
       int existingIndex,
       ) {
     if (existingIndex != -1) {
-      // Remove unfavorited product from favorites list
+      // Remove unfavorite product from favorites list
       products.removeAt(existingIndex);
       LogManager.debug("removed unfavorited product ${updatedProduct.id}");
     }

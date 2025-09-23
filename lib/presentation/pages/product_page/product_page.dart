@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_mvvm_bloc_architecture/common/logging/log_manager.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc_base.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_all_bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/pages/product_page/product_body.dart';
-import 'package:flutter_mvvm_bloc_architecture/utils/log_manager.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ProductPage extends StatefulWidget {
   final String pageTitle;
 
-  const ProductPage({
-    super.key,
-    required this.pageTitle,
-  });
+  const ProductPage({Key? key, required this.pageTitle}) : super(key: key);
 
-  const ProductPage.forHome() : this(pageTitle: "Products");
+  const ProductPage.forHome({Key? key})
+      : this(key: key, pageTitle: "Products");
 
-  const ProductPage.forFavourites() : this(pageTitle: "Favourites");
+  const ProductPage.forFavourites({Key? key})
+      : this(key: key, pageTitle: "Favourites");
 
   @override
   State<StatefulWidget> createState() => _ProductsPageState();
