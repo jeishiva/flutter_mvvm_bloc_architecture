@@ -2,24 +2,26 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product_filter.dart';
-import 'package:flutter_mvvm_bloc_architecture/domain/repositories/product_repo.dart';
+import 'package:flutter_mvvm_bloc_architecture/domain/usecases/product/extension/product_extension.dart';
+import 'package:flutter_mvvm_bloc_architecture/domain/usecases/product/params/product_param.dart';
+import 'package:flutter_mvvm_bloc_architecture/domain/usecases/product/product_use_cases.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_all_bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/common/logging/log_manager.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/mappers/product_ui_list_mapper.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/ui_models/product_ui_model.dart';
 
 abstract class BaseProductBloc extends Bloc<ProductEvent, ProductState> {
-  final ProductRepository productRepo;
+  final ProductUseCases productUseCases;
   StreamSubscription<Product>? _repoSub;
   bool _isLoadingPage = false;
 
-  BaseProductBloc(this.productRepo) : super(const ProductInitial()) {
+  BaseProductBloc(this.productUseCases) : super(const ProductInitial()) {
     on<LoadProducts>(_onLoadProducts);
     on<LoadMore>(_onLoadMore);
     on<ToggleFavourite>(_onToggleFavourite);
     on<ExternalProductChanged>(onExternalProductChanged);
 
-    _repoSub = productRepo.changes.listen((updatedProduct) {
+    _repoSub = productUseCases.watchProductChanges().listen((updatedProduct) {
       LogManager.debug("external product changed ${updatedProduct.id}");
       add(ExternalProductChanged(updatedProduct));
     });
@@ -62,11 +64,11 @@ abstract class BaseProductBloc extends Bloc<ProductEvent, ProductState> {
       final loadContext = _prepareLoadContext(event);
       _emitPreLoadState(emit, loadContext, event.productFilter);
 
-      final pageResult = await productRepo.getAllProducts(
+      final pageResult = await productUseCases.getProducts(GetProductsParams(
         nextCursor: loadContext.nextCursor,
         limit: 20,
         productFilter: event.productFilter,
-      );
+      ));
 
       final combinedProducts = _combineProducts(
         loadContext.prevProducts,
@@ -176,7 +178,7 @@ abstract class BaseProductBloc extends Bloc<ProductEvent, ProductState> {
 
     // Attempt remote update with rollback on failure
     try {
-      await productRepo.toggleFavourite(event.productId);
+      await productUseCases.toggleFavourite(ToggleFavouriteParams(productId: event.productId));
     } catch (e, st) {
       LogManager.error('toggleFavourite failed', e, st);
       _emitUpdatedState(emit, currentState, previousProducts);
