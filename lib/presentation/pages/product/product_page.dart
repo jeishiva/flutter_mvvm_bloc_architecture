@@ -23,7 +23,7 @@ class ProductPage extends StatefulWidget {
     : this(key: key, pageTitle: "Favourites", canToggleFavourite: false);
 
   @override
-  State<StatefulWidget> createState() => _ProductsPageState();
+  State<ProductPage> createState() => _ProductsPageState();
 }
 
 class _ProductsPageState extends State<ProductPage> {

@@ -3,7 +3,7 @@ import 'package:flutter_mvvm_bloc_architecture/common/logging/log_manager.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/routes.dart';
 
 class SplashPage extends StatefulWidget {
-  const SplashPage({Key? key}) : super(key: key);
+  const SplashPage({super.key});
 
   @override
   State<StatefulWidget> createState() {
@@ -19,12 +19,12 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   Future<void> _init() async {
-    try {
-      await Future.delayed(const Duration(seconds: 2));
-      Navigator.pushReplacementNamed(context, Routes.home);
-    } catch (e) {
-       LogManager.error("app init failed");
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(seconds: 1));
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, Routes.home);
+      }
+    });
   }
 
   @override

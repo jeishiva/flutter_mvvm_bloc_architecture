@@ -77,11 +77,13 @@ abstract class BaseProductBloc extends Bloc<ProductEvent, ProductState> {
       final loadContext = _prepareLoadContext(event);
       _emitPreLoadState(emit, loadContext, event.productFilter);
 
-      final pageResult = await productUseCases.getProducts(GetProductsParams(
-        nextCursor: loadContext.nextCursor,
-        limit: 20,
-        productFilter: event.productFilter,
-      ));
+      final pageResult = await productUseCases.getProducts(
+        GetProductsParams(
+          nextCursor: loadContext.nextCursor,
+          limit: 20,
+          productFilter: event.productFilter,
+        ),
+      );
 
       final combinedProducts = _combineProducts(
         loadContext.prevProducts,
@@ -111,7 +113,9 @@ abstract class BaseProductBloc extends Bloc<ProductEvent, ProductState> {
     final filterChanged = currentState?.productFilter != event.productFilter;
 
     return _LoadContext(
-      prevProducts: filterChanged ? <ProductUiModel>[] : currentState?.products ?? [],
+      prevProducts: filterChanged
+          ? <ProductUiModel>[]
+          : currentState?.products ?? [],
       nextCursor: filterChanged ? null : currentState?.nextCursor,
       prevHasMore: filterChanged ? true : (currentState?.hasMore ?? true),
       isFilterChanged: filterChanged,
@@ -185,13 +189,14 @@ abstract class BaseProductBloc extends Bloc<ProductEvent, ProductState> {
       currentState.products,
       event.productId,
     );
-
     // Optimistic update
     _emitUpdatedState(emit, currentState, updatedProducts);
 
     // Attempt remote update with rollback on failure
     try {
-      await productUseCases.toggleFavourite(ToggleFavouriteParams(productId: event.productId));
+      await productUseCases.toggleFavourite(
+        ToggleFavouriteParams(productId: event.productId),
+      );
     } catch (e, st) {
       LogManager.error('toggleFavourite failed', e, st);
       _emitUpdatedState(emit, currentState, previousProducts);
@@ -202,12 +207,13 @@ abstract class BaseProductBloc extends Bloc<ProductEvent, ProductState> {
     List<ProductUiModel> products,
     String productId,
   ) {
-    return products.map((product) {
+    final result = products.map((product) {
       if (product.id == productId) {
         return product.copyWith(isFavourite: !product.isFavourite);
       }
       return product;
     }).toList();
+    return result;
   }
 
   void _emitUpdatedState(

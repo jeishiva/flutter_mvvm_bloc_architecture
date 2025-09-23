@@ -10,12 +10,12 @@ class HomePhonePage extends StatefulWidget {
   const HomePhonePage({super.key});
 
   @override
-  HomePhonePageState createState() {
-    return HomePhonePageState();
+  State<HomePhonePage> createState() {
+    return _HomePhonePageState();
   }
 }
 
-class HomePhonePageState extends State<HomePhonePage> {
+class _HomePhonePageState extends State<HomePhonePage> {
   int _selectedIndex = 0;
 
   // create per-tab blocs so parent can trigger loads when needed
