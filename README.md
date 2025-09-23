@@ -10,6 +10,12 @@ A simple **mobile and tablet app** that lists products with **infinite scrolling
 
 This project was created as a **reference implementation** of **MVVM + BLoC + Clean Architecture** in Flutter, showcasing responsive layouts, scalable state management, and separation of concerns.
 
+
+## ✦ Demo
+  
+   Check out a quick demo of the app in action:
+   [![Watch on Youtube](https://img.youtube.com/vi/OCxVdlxSMYs/0.jpg)](https://youtube.com/shorts/OCxVdlxSMYs?feature=share)
+
 ---
 ## ✦ Features
 
