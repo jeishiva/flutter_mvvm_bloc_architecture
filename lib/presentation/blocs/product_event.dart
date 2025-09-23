@@ -1,4 +1,4 @@
-part of 'product_bloc.dart';
+part of 'product_all_bloc.dart';
 
 abstract class ProductEvent extends Equatable {
   const ProductEvent();
@@ -7,6 +7,23 @@ abstract class ProductEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class LoadProducts extends ProductEvent {}
+class LoadProducts extends ProductEvent {
+  const LoadProducts(this.productFilter);
 
-class LoadMore extends ProductEvent {}
+  final ProductFilter productFilter;
+}
+
+class ToggleFavourite extends ProductEvent {
+  final String productId;
+
+  const ToggleFavourite(this.productId);
+}
+
+class LoadMore extends ProductEvent {
+  const LoadMore();
+}
+
+class ExternalProductChanged extends ProductEvent {
+  const ExternalProductChanged(this.product);
+  final Product product;
+}

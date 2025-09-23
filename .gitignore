@@ -118,6 +118,8 @@ app.*.symbols
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 !/dev/ci/**/Gemfile.lock
 
-# Android Studio
+# JetBrains / IntelliJ / Android Studio
+*.iml
 .idea/
-.metadata
+*.iws
+.idea_modules/

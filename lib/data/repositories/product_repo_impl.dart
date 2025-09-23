@@ -1,33 +1,63 @@
+import 'dart:async';
+
 import 'package:flutter_mvvm_bloc_architecture/data/datasources/product_local_data_source.dart';
 import 'package:flutter_mvvm_bloc_architecture/data/models/product_model.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/common/pagination/page_result.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
+import 'package:flutter_mvvm_bloc_architecture/domain/entities/product_filter.dart';
 
 import '../../domain/repositories/product_repo.dart';
 
 class ProductRepositoryImpl implements ProductRepository {
-  final ProductLocalDataSource localDataSource;
-
-  const ProductRepositoryImpl({required this.localDataSource});
-
   @override
-  Future<void> addProduct(Product product) async {
-    await localDataSource.addProduct(ProductModel.fromEntity(product));
-  }
+  Stream<Product> get changes => _changes.stream;
+
+  final ProductLocalDataSource localDataSource;
+  final StreamController<Product> _changes;
+
+  ProductRepositoryImpl({
+    required this.localDataSource,
+    required StreamController<Product> changesController,
+  }) : _changes = changesController;
 
   @override
   Future<PageResult<Product>> getAllProducts({
-    required int pageNumber,
     required int limit,
-    required int offset,
+    String? nextCursor,
+    required ProductFilter productFilter,
   }) async {
     final PageResult<ProductModel> pageResult = await localDataSource
-        .getAllProducts(pageNumber: pageNumber, limit: limit, offset: offset);
+        .getAllProducts(
+          cursor: nextCursor,
+          limit: limit,
+          productFilter: productFilter,
+        );
     final PageResult<Product> result = PageResult(
       data: pageResult.data.map((model) => model.toEntity()).toList(),
       hasMore: pageResult.hasMore,
-      pageNumber: pageResult.pageNumber,
+      nextCursor: pageResult.nextCursor,
     );
     return result;
+  }
+
+  @override
+  Future<void> toggleFavourite(String productId) async {
+    final updated = (await localDataSource.toggleFavourite(
+      productId,
+    )).toEntity();
+    _changes.add(updated);
+  }
+
+  @override
+  Future<void> initialize() async {
+    return localDataSource.initialize();
+  }
+
+  @override
+  void dispose() => _changes.close();
+
+  @override
+  Future<Product> getProduct(String productId) async {
+    return (await localDataSource.getProduct(productId)).toEntity();
   }
 }
