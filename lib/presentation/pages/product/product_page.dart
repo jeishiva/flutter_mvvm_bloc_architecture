@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/common/logging/log_manager.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc_base.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_all_bloc.dart';
-import 'package:flutter_mvvm_bloc_architecture/presentation/pages/product_page/product_body.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/pages/product/product_body.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ProductPage extends StatefulWidget {

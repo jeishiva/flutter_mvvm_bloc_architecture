@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mvvm_bloc_architecture/di/injector.dart';
-import 'package:flutter_mvvm_bloc_architecture/presentation/pages/home_page.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/pages/home/home_page.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/pages/splash_page.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/routes.dart';
 

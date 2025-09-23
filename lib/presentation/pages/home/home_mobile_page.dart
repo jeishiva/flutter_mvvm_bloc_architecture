@@ -4,58 +4,18 @@ import 'package:flutter_mvvm_bloc_architecture/di/injector.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product_filter.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_all_bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc_base.dart';
-import 'package:flutter_mvvm_bloc_architecture/presentation/pages/product_page/product_page.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/pages/product/product_page.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class HomePhonePage extends StatefulWidget {
+  const HomePhonePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        bool isTablet = constraints.maxWidth > 600;
-        if (isTablet) {
-          return Row(
-            children: [
-              Expanded(
-                flex: 1,
-                child: BlocProvider(
-                  create: (_) =>
-                  getIt<BaseProductBloc>(param1: 'all')
-                    ..add(const LoadProducts(ProductFilter.noFilters())),
-                  child: const ProductPage.forHome(),
-                ),
-              ),
-              // Favourites
-              Expanded(
-                flex: 1,
-                child: BlocProvider(
-                  create: (_) =>
-                  getIt<BaseProductBloc>(param1: 'fav')
-                    ..add(const LoadProducts(ProductFilter.favourites())),
-                  child: const ProductPage.forFavourites()
-                ),
-              ),
-            ],
-          );
-        } else {
-          // Phone: Bottom navigation
-          return const BottomNavigationScaffold();
-        }
-      },
-    );
+  HomePhonePageState createState() {
+    return HomePhonePageState();
   }
 }
 
-class BottomNavigationScaffold extends StatefulWidget {
-  const BottomNavigationScaffold({super.key});
-
-  @override
-  _BottomNavigationScaffoldState createState() =>
-      _BottomNavigationScaffoldState();
-}
-
-class _BottomNavigationScaffoldState extends State<BottomNavigationScaffold> {
+class HomePhonePageState extends State<HomePhonePage> {
   int _selectedIndex = 0;
 
   // create per-tab blocs so parent can trigger loads when needed

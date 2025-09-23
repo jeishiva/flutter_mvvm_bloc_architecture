@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
+import 'package:flutter_mvvm_bloc_architecture/di/injector.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product_filter.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/usecases/product/extension/product_extension.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_mvvm_bloc_architecture/domain/usecases/product/params/pr
 import 'package:flutter_mvvm_bloc_architecture/domain/usecases/product/product_use_cases.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_all_bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/common/logging/log_manager.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_fav_bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/mappers/product_ui_list_mapper.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/ui_models/product_ui_model.dart';
 
@@ -25,6 +27,17 @@ abstract class BaseProductBloc extends Bloc<ProductEvent, ProductState> {
       LogManager.debug("external product changed ${updatedProduct.id}");
       add(ExternalProductChanged(updatedProduct));
     });
+  }
+
+  static create(String param) {
+    switch (param) {
+      case 'all':
+        return ProductAllBloc(getIt<ProductUseCases>());
+      case 'fav':
+        return ProductFavBloc(getIt<ProductUseCases>());
+      default:
+        throw ArgumentError('Unknown bloc type: $param');
+    }
   }
 
   // Abstract method - must be implemented by subclasses
