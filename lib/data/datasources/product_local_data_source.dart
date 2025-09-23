@@ -18,6 +18,8 @@ abstract class ProductLocalDataSource {
   });
 
   Future<ProductModel> toggleFavourite(String productId);
+
+  Future<ProductModel> getProduct(String productId);
 }
 
 class ProductLocalDataSourceImpl implements ProductLocalDataSource {
@@ -133,5 +135,10 @@ class ProductLocalDataSourceImpl implements ProductLocalDataSource {
   @override
   Future<void> initialize() async {
     _loadProductsIfNeeded();
+  }
+
+  @override
+  Future<ProductModel> getProduct(String productId) async {
+    return _productList.firstWhere((p) => p.id == productId);
   }
 }

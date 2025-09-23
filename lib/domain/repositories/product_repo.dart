@@ -12,6 +12,8 @@ abstract class ProductRepository {
     required ProductFilter productFilter,
   });
 
+  Future<Product> getProduct(String productId);
+
   Future<void> toggleFavourite(String productId);
 
   Stream<Product> get changes; // expose stream

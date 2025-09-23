@@ -5,6 +5,8 @@ import 'package:flutter_mvvm_bloc_architecture/domain/entities/product_filter.da
 import 'package:flutter_mvvm_bloc_architecture/domain/repositories/product_repo.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_all_bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/common/logging/log_manager.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/mappers/product_ui_list_mapper.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/ui_models/product_ui_model.dart';
 
 abstract class BaseProductBloc extends Bloc<ProductEvent, ProductState> {
   final ProductRepository productRepo;
@@ -68,7 +70,7 @@ abstract class BaseProductBloc extends Bloc<ProductEvent, ProductState> {
 
       final combinedProducts = _combineProducts(
         loadContext.prevProducts,
-        pageResult.data,
+        pageResult.data.toUiList(),
       );
 
       emit(
@@ -94,7 +96,7 @@ abstract class BaseProductBloc extends Bloc<ProductEvent, ProductState> {
     final filterChanged = currentState?.productFilter != event.productFilter;
 
     return _LoadContext(
-      prevProducts: filterChanged ? <Product>[] : currentState?.products ?? [],
+      prevProducts: filterChanged ? <ProductUiModel>[] : currentState?.products ?? [],
       nextCursor: filterChanged ? null : currentState?.nextCursor,
       prevHasMore: filterChanged ? true : (currentState?.hasMore ?? true),
       isFilterChanged: filterChanged,
@@ -122,9 +124,9 @@ abstract class BaseProductBloc extends Bloc<ProductEvent, ProductState> {
     }
   }
 
-  List<Product> _combineProducts(
-    List<Product> existingProducts,
-    List<Product> newProducts,
+  List<ProductUiModel> _combineProducts(
+    List<ProductUiModel> existingProducts,
+    List<ProductUiModel> newProducts,
   ) {
     final existingIds = existingProducts.map((e) => e.id).toSet();
     final newItems = newProducts
@@ -163,7 +165,7 @@ abstract class BaseProductBloc extends Bloc<ProductEvent, ProductState> {
     if (state is! ProductStateWithData) return;
 
     final currentState = state as ProductStateWithData;
-    final previousProducts = List<Product>.from(currentState.products);
+    final previousProducts = List<ProductUiModel>.from(currentState.products);
     final updatedProducts = _toggleProductFavourite(
       currentState.products,
       event.productId,
@@ -181,8 +183,8 @@ abstract class BaseProductBloc extends Bloc<ProductEvent, ProductState> {
     }
   }
 
-  List<Product> _toggleProductFavourite(
-    List<Product> products,
+  List<ProductUiModel> _toggleProductFavourite(
+    List<ProductUiModel> products,
     String productId,
   ) {
     return products.map((product) {
@@ -196,7 +198,7 @@ abstract class BaseProductBloc extends Bloc<ProductEvent, ProductState> {
   void _emitUpdatedState(
     Emitter<ProductState> emit,
     ProductStateWithData currentState,
-    List<Product> products,
+    List<ProductUiModel> products,
   ) {
     if (currentState is ProductLoaded) {
       emit(currentState.copyWith(products: products));
@@ -223,7 +225,7 @@ abstract class BaseProductBloc extends Bloc<ProductEvent, ProductState> {
 }
 
 class _LoadContext {
-  final List<Product> prevProducts;
+  final List<ProductUiModel> prevProducts;
   final String? nextCursor;
   final bool prevHasMore;
   final bool isFilterChanged;

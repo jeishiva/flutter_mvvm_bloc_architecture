@@ -4,9 +4,10 @@ import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
 import 'package:flutter_mvvm_bloc_architecture/extensions/string_extension.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc_base.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_all_bloc.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/ui_models/product_ui_model.dart';
 
 class ProductListWidget extends StatelessWidget {
-  final List<Product> products;
+  final List<ProductUiModel> products;
   final bool hasMore;
   final ScrollController? controller;
   final bool isLoadingMore;
@@ -53,8 +54,8 @@ class ProductListWidget extends StatelessWidget {
 }
 
 class ProductListItem extends StatelessWidget {
-  final Product product;
-  final ValueChanged<Product> onFavoriteToggle;
+  final ProductUiModel product;
+  final ValueChanged<ProductUiModel> onFavoriteToggle;
 
   const ProductListItem({
     super.key,
@@ -77,7 +78,7 @@ class ProductListItem extends StatelessWidget {
           radius: 36,
           backgroundColor: theme.colorScheme.primaryContainer,
           child: Text(
-            product.name.isNotEmpty ? product.name[0].toUpperCase() : '?',
+            product.title.isNotEmpty ? product.title[0].toUpperCase() : '?',
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
               color: theme.colorScheme.onPrimaryContainer,
@@ -85,14 +86,14 @@ class ProductListItem extends StatelessWidget {
           ),
         ),
         title: Text(
-          product.name.capitalize(),
+          product.title.capitalize(),
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w400,
             fontSize: 18,
           ),
         ),
         subtitle: Text(
-          'Price: ${product.price.toString()}',
+          'Price: ${product.subtitle.toString()}',
           style: theme.textTheme.bodyLarge?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),

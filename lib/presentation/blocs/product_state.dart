@@ -16,7 +16,7 @@ class ProductInitial extends ProductState {
 }
 
 abstract class ProductStateWithData extends ProductState {
-  final List<Product> products;
+  final List<ProductUiModel> products;
   final bool hasMore;
   final String? nextCursor;
   final ProductFilter productFilter;
@@ -41,7 +41,7 @@ class ProductLoaded extends ProductStateWithData {
   });
 
   ProductLoaded copyWith({
-    List<Product>? products,
+    List<ProductUiModel>? products,
     bool? hasMore,
     String? nextCursor,
     bool? isLoadingMore,
@@ -71,7 +71,7 @@ class ProductError extends ProductStateWithData {
 
   const ProductError({
     required this.errorMessage,
-    super.products = const <Product>[],
+    super.products = const <ProductUiModel>[],
     super.hasMore = false,
     required super.productFilter,
     super.nextCursor,
@@ -79,7 +79,7 @@ class ProductError extends ProductStateWithData {
 
   ProductError copyWith({
     String? errorMessage,
-    List<Product>? products,
+    List<ProductUiModel>? products,
     bool? hasMore,
     String? nextCursor,
     ProductFilter? productFilter,

@@ -55,4 +55,9 @@ class ProductRepositoryImpl implements ProductRepository {
 
   @override
   void dispose() => _changes.close();
+
+  @override
+  Future<Product> getProduct(String productId) async {
+    return (await localDataSource.getProduct(productId)).toEntity();
+  }
 }

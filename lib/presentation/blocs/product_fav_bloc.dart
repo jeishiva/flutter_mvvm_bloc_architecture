@@ -5,15 +5,17 @@ import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc_base.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_all_bloc.dart';
 import 'package:flutter_mvvm_bloc_architecture/common/logging/log_manager.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/mappers/product_ui_list_mapper.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/ui_models/product_ui_model.dart';
 
 class ProductFavBloc extends BaseProductBloc {
   ProductFavBloc(super.productRepo);
 
   @override
   FutureOr<void> onExternalProductChanged(
-      ExternalProductChanged event,
-      Emitter<ProductState> emit,
-      ) async {
+    ExternalProductChanged event,
+    Emitter<ProductState> emit,
+  ) async {
     LogManager.debug("external product function called for favorites");
 
     final updated = event.product;
@@ -26,11 +28,13 @@ class ProductFavBloc extends BaseProductBloc {
   }
 
   List<Product> _updateFavoritesList(
-      List<Product> products,
-      Product updatedProduct,
-      ) {
+    List<ProductUiModel> products,
+    Product updatedProduct,
+  ) {
     final newProducts = List<Product>.from(products);
-    final existingIndex = newProducts.indexWhere((p) => p.id == updatedProduct.id);
+    final existingIndex = newProducts.indexWhere(
+      (p) => p.id == updatedProduct.id,
+    );
 
     if (updatedProduct.isFavourite) {
       _handleAddOrUpdateFavorite(newProducts, updatedProduct, existingIndex);
@@ -42,10 +46,10 @@ class ProductFavBloc extends BaseProductBloc {
   }
 
   void _handleAddOrUpdateFavorite(
-      List<Product> products,
-      Product updatedProduct,
-      int existingIndex,
-      ) {
+    List<Product> products,
+    Product updatedProduct,
+    int existingIndex,
+  ) {
     if (existingIndex == -1) {
       // Add new favorite product
       products.add(updatedProduct);
@@ -58,10 +62,10 @@ class ProductFavBloc extends BaseProductBloc {
   }
 
   void _handleRemoveFavorite(
-      List<Product> products,
-      Product updatedProduct,
-      int existingIndex,
-      ) {
+    List<Product> products,
+    Product updatedProduct,
+    int existingIndex,
+  ) {
     if (existingIndex != -1) {
       // Remove unfavorite product from favorites list
       products.removeAt(existingIndex);
@@ -71,19 +75,19 @@ class ProductFavBloc extends BaseProductBloc {
   }
 
   void _emitUpdatedFavoritesState(
-      Emitter<ProductState> emit,
-      ProductStateWithData currentState,
-      List<Product> products,
-      ) {
-    // Emit preserving concrete state type where possible
+    Emitter<ProductState> emit,
+    ProductStateWithData currentState,
+    List<Product> products,
+  ) {
+    final productsUiList = products.toUiList();
     if (currentState is ProductLoaded) {
-      emit(currentState.copyWith(products: products));
+      emit(currentState.copyWith(products: productsUiList));
     } else if (currentState is ProductError) {
-      emit(currentState.copyWith(products: products));
+      emit(currentState.copyWith(products: productsUiList));
     } else {
       emit(
         ProductLoaded(
-          products: products,
+          products: productsUiList,
           hasMore: currentState.hasMore,
           nextCursor: currentState.nextCursor,
           isLoadingMore: false,

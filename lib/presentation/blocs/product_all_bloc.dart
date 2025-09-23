@@ -7,6 +7,8 @@ import 'package:flutter_mvvm_bloc_architecture/common/logging/log_manager.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
 import 'package:flutter_mvvm_bloc_architecture/domain/entities/product_filter.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc_base.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/mappers/product_ui_list_mapper.dart';
+import 'package:flutter_mvvm_bloc_architecture/presentation/ui_models/product_ui_model.dart';
 
 part 'product_event.dart';
 
@@ -17,9 +19,9 @@ class ProductAllBloc extends BaseProductBloc {
 
   @override
   FutureOr<void> onExternalProductChanged(
-      ExternalProductChanged event,
-      Emitter<ProductState> emit,
-      ) async {
+    ExternalProductChanged event,
+    Emitter<ProductState> emit,
+  ) async {
     LogManager.debug("external product function called");
 
     final updated = event.product;
@@ -32,9 +34,9 @@ class ProductAllBloc extends BaseProductBloc {
   }
 
   List<Product> _updateProductInList(
-      List<Product> products,
-      Product updatedProduct,
-      ) {
+    List<ProductUiModel> products,
+    Product updatedProduct,
+  ) {
     final idx = products.indexWhere((p) => p.id == updatedProduct.id);
     final newProducts = List<Product>.from(products);
 
@@ -50,19 +52,20 @@ class ProductAllBloc extends BaseProductBloc {
   }
 
   void _emitUpdatedProductState(
-      Emitter<ProductState> emit,
-      ProductStateWithData currentState,
-      List<Product> products,
-      ) {
+    Emitter<ProductState> emit,
+    ProductStateWithData currentState,
+    List<Product> products,
+  ) {
+    final productsUiList = products.toUiList();
     // Emit preserving concrete state type where possible
     if (currentState is ProductLoaded) {
-      emit(currentState.copyWith(products: products));
+      emit(currentState.copyWith(products: productsUiList));
     } else if (currentState is ProductError) {
-      emit(currentState.copyWith(products: products));
+      emit(currentState.copyWith(products: productsUiList));
     } else {
       emit(
         ProductLoaded(
-          products: products,
+          products: productsUiList,
           hasMore: currentState.hasMore,
           nextCursor: currentState.nextCursor,
           isLoadingMore: false,
