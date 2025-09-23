@@ -6,8 +6,9 @@ import 'package:flutter_mvvm_bloc_architecture/presentation/pages/product_page/p
 
 class ProductBody extends StatelessWidget {
   final ScrollController? controller;
+  final bool canToggleFavourite;
 
-  const ProductBody({super.key, this.controller});
+  const ProductBody({super.key, this.controller, required this.canToggleFavourite});
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +27,7 @@ class ProductBody extends StatelessWidget {
               hasMore: hasMore,
               isLoadingMore: isLoadingMore,
               controller: controller,
+              canToggleFavourite: canToggleFavourite,
             ),
 
           ProductError(errorMessage: final message) => ProductErrorWidget(

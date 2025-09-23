@@ -8,14 +8,19 @@ import 'package:rxdart/rxdart.dart';
 
 class ProductPage extends StatefulWidget {
   final String pageTitle;
+  final bool canToggleFavourite;
 
-  const ProductPage({Key? key, required this.pageTitle}) : super(key: key);
+  const ProductPage({
+    super.key,
+    required this.pageTitle,
+    required this.canToggleFavourite,
+  });
 
   const ProductPage.forHome({Key? key})
-      : this(key: key, pageTitle: "Products");
+    : this(key: key, pageTitle: "Products", canToggleFavourite: true);
 
   const ProductPage.forFavourites({Key? key})
-      : this(key: key, pageTitle: "Favourites");
+    : this(key: key, pageTitle: "Favourites", canToggleFavourite: false);
 
   @override
   State<StatefulWidget> createState() => _ProductsPageState();
@@ -36,14 +41,14 @@ class _ProductsPageState extends State<ProductPage> {
     _scrollSubject
         .throttleTime(const Duration(milliseconds: 100)) // or debounceTime
         .listen((_) {
-      const double threshold = 400.0;
-      final remaining = _scrollController.position.extentAfter;
+          const double threshold = 400.0;
+          final remaining = _scrollController.position.extentAfter;
 
-      if (remaining <= threshold) {
-        LogManager.debug("threshold reached");
-        _loadNextPage();
-      }
-    });
+          if (remaining <= threshold) {
+            LogManager.debug("threshold reached");
+            _loadNextPage();
+          }
+        });
   }
 
   void _onScroll() {
@@ -66,9 +71,7 @@ class _ProductsPageState extends State<ProductPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.pageTitle),
-      ),
+      appBar: AppBar(title: Text(widget.pageTitle)),
       body: SafeArea(
         child: BlocListener<BaseProductBloc, ProductState>(
           listener: (context, state) {
@@ -81,7 +84,10 @@ class _ProductsPageState extends State<ProductPage> {
               _isLoadingMore = false;
             }
           },
-          child: ProductBody(controller: _scrollController),
+          child: ProductBody(
+            controller: _scrollController,
+            canToggleFavourite: widget.canToggleFavourite,
+          ),
         ),
       ),
     );

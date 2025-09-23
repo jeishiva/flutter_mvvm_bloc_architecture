@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_mvvm_bloc_architecture/domain/entities/product.dart';
 import 'package:flutter_mvvm_bloc_architecture/extensions/string_extension.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_bloc_base.dart';
 import 'package:flutter_mvvm_bloc_architecture/presentation/blocs/product_all_bloc.dart';
@@ -11,6 +10,7 @@ class ProductListWidget extends StatelessWidget {
   final bool hasMore;
   final ScrollController? controller;
   final bool isLoadingMore;
+  final bool canToggleFavourite;
 
   const ProductListWidget({
     super.key,
@@ -18,6 +18,7 @@ class ProductListWidget extends StatelessWidget {
     required this.hasMore,
     required this.isLoadingMore,
     this.controller,
+    required this.canToggleFavourite,
   });
 
   @override
@@ -34,6 +35,7 @@ class ProductListWidget extends StatelessWidget {
             onFavoriteToggle: (product) {
               context.read<BaseProductBloc>().add(ToggleFavourite(product.id));
             },
+            canToggleFavourite: canToggleFavourite,
           );
         } else {
           // loading indicator at list bottom
@@ -56,11 +58,13 @@ class ProductListWidget extends StatelessWidget {
 class ProductListItem extends StatelessWidget {
   final ProductUiModel product;
   final ValueChanged<ProductUiModel> onFavoriteToggle;
+  final bool canToggleFavourite;
 
   const ProductListItem({
     super.key,
     required this.product,
     required this.onFavoriteToggle,
+    required this.canToggleFavourite,
   });
 
   @override
@@ -99,7 +103,9 @@ class ProductListItem extends StatelessWidget {
           ),
         ),
         trailing: IconButton(
-          onPressed: () => onFavoriteToggle(product),
+          onPressed: () => canToggleFavourite
+              ? onFavoriteToggle(product)
+              : null, // returning null disables the button
           icon: Icon(
             product.isFavourite ? Icons.favorite : Icons.favorite_border,
             color: product.isFavourite
